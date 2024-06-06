@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nagoyameshi.entity.House;
+import com.example.nagoyameshi.form.HouseEditForm;
 import com.example.nagoyameshi.form.HouseRegisterForm;
 import com.example.nagoyameshi.repository.HouseRepository;
 import com.example.nagoyameshi.service.HouseService;
@@ -80,6 +81,7 @@ public class AdminHouseController {
          return "admin/houses/register";
      }   
 	 
+//	 ＜店舗情報登録＞
 	 @PostMapping("/create")
 //	 メソッドの引数に@ModelAttributeアノテーションをつけ、フォームから送信されたデータ（フォームクラスのインスタンス）をその引数にバインド（割り当て）できる
      public String create(@ModelAttribute @Validated HouseRegisterForm houseRegisterForm,
@@ -96,5 +98,53 @@ public class AdminHouseController {
 //       店舗一覧にリダイレクトする
          return "redirect:/admin/houses";
 	 }
-
+	 
+//	 ＜店舗情報編集：元情報をビューに渡すSTEP＞
+	 @GetMapping("/{id}/edit")
+     public String edit(@PathVariable(name = "id") Integer id, Model model) {
+//		 該当するidの情報をhousesテーブルから取得する
+         House house = houseRepository.getReferenceById(id);
+         
+         String imageName = house.getImageName();
+         
+//       フォームクラスをインスタンス化
+         HouseEditForm houseEditForm = new HouseEditForm(house.getId(), house.getName(), null, house.getDescription(), house.getPriceMax(), house.getPriceMin(), house.getCapacity(), house.getPostalCode(), house.getAddress(), house.getPhoneNumber());
+         
+         model.addAttribute("imageName", imageName);
+//       インスタンス化したフォームクラスの値をビューに返す（コンストラクタは"houseEditForm"で作成済み）
+         model.addAttribute("houseEditForm", houseEditForm);
+         
+         return "admin/houses/edit";
+     }    
+	 
+//	 ＜店舗情報編集：元情報をビューに渡すSTEP＞
+	 @PostMapping("/{id}/update")
+     public String update(@ModelAttribute @Validated HouseEditForm houseEditForm,
+    		 			  BindingResult bindingResult,
+    		 			  RedirectAttributes redirectAttributes) { 
+//		 エラーがあれば、editビューに表示
+		 if (bindingResult.hasErrors()) {
+             return "admin/houses/edit";
+         }
+         
+//		 houseServiceのupdate()を実行
+         houseService.update(houseEditForm);
+         
+         redirectAttributes.addFlashAttribute("successMessage", "店舗情報を編集しました。");
+         
+//       編集が成功したら店舗一覧に成功メッセージを表示
+         return "redirect:/admin/houses";
+     }    
+	 
+//	 ＜店舗情報削除＞
+	 @PostMapping("/{id}/delete")
+     public String delete(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes) {
+//		 対象idの情報を削除
+         houseRepository.deleteById(id);
+                 
+         redirectAttributes.addFlashAttribute("successMessage", "店舗情報を削除しました。");
+         
+//       削除が成功したら店舗一覧に成功メッセージを表示
+         return "redirect:/admin/houses";
+     }    
 }

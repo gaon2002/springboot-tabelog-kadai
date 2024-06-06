@@ -12,7 +12,7 @@ public class HouseRegisterForm {
 	
 	// 登録フィールド設定
 	
-	@NotBlank(message = "民宿名を入力してください。")
+	@NotBlank(message = "店舗名を入力してください。")
 	private String name;
 	
 	// ビューでアップロードされたファイルを受け取るフィールドをMultipartFile型で設定

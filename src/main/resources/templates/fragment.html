@@ -30,6 +30,7 @@
 		<div th:fragment="header" th:remove="tag">
 			<nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm samuraitravel-navbar">
 				<div class="container samuraitravel-container">
+<!--				TOPページリンク（未ログイン）-->
 					<a class="navbar-brand" th:href="@{/}">
 						<img class="samuraitravel-logo me-1" th:src="@{/images/logo.png}" alt="SAMURAI Travel">
 					</a>
@@ -52,9 +53,9 @@
 								<a class="nav-link" th:href="@{/signup}">会員登録</a>
 							</li>
 							
-<!--						■ログイン済みであれば表示する-->
+<!--						■ログイン済みの有料会員（PAID）であれば表示する-->
 <!--							-"hasRole('ロール名')"：匿名ユーザー(未ログインのユーザー)であれば表示-->
-							<li class="nav-item dropdown" sec:authorize="hasRole('ROLE_GENERAL')">
+							<li class="nav-item dropdown" sec:authorize="hasRole('ROLE_PAID')">
 									<a id="navbarDropdownGeneral" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
 	<!--								・sec:authentication：会員氏名の表示　"principal.user.name"で表示できる-->
 	<!--								・Spring SecurityではUserDetailsを実装したクラスのオブジェクト（本prgではUserDetailsImplオブジェクト）がPrincipalオブジェクトの中に格納されるため-->
@@ -63,9 +64,34 @@
 									
 								<div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownGeneral">
 										
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/user}">民宿一覧(会員用)</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/user}">会員情報</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/reservations}">予約一覧</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/favorite}">お気に入り一覧</a>
+										
+									<div class="dropdown-diviver"></div>
+										
+										
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+											ログアウト
+									</a>
+									<form class="d-none" id="logout-form" th:action="@{/logout}" method="post"></form>
+								</div>
+							</li>
+
+<!--						■ログイン済みの無料会員（FREE）であれば表示する-->
+<!--							-"hasRole('ロール名')"：匿名ユーザー(未ログインのユーザー)であれば表示-->
+							<li class="nav-item dropdown" sec:authorize="hasRole('ROLE_FREE')">
+									<a id="navbarDropdownGeneral" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+	<!--								・sec:authentication：会員氏名の表示　"principal.user.name"で表示できる-->
+	<!--								・Spring SecurityではUserDetailsを実装したクラスのオブジェクト（本prgではUserDetailsImplオブジェクト）がPrincipalオブジェクトの中に格納されるため-->
+										<span sec:authentication="principal.user.name"></span>
+									</a>
+									
+								<div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownGeneral">
+										
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/user}">民宿一覧(会員用)</a>
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/user}">会員情報</a>
 										
 									<div class="dropdown-diviver"></div>
 										
@@ -86,7 +112,7 @@
 								<div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownAdmin">
 <!--								■メニューのドロップダウン表示-->
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/users}">会員一覧</a>  
-									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/houses}">民宿一覧</a>
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/houses}">民宿一覧（管理者用）</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
 										ログアウト
 									</a>

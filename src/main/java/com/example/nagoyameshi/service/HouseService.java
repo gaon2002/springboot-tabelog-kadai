@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.nagoyameshi.entity.House;
+import com.example.nagoyameshi.form.HouseEditForm;
 import com.example.nagoyameshi.form.HouseRegisterForm;
 import com.example.nagoyameshi.repository.HouseRepository;
 
@@ -26,6 +27,7 @@ public class HouseService {
     
     @Transactional
 //  @Transactionalアノテーション： データベース操作が完全に成功するか、すべて失敗するかのどちらかに白黒はっきりさせられるため、データの整合性を保つことができる
+//   ＜店舗情報登録＞
     public void create(HouseRegisterForm houseRegisterForm) {
 //    	エンティティ（Houseクラス）をインスタンス化
         House house = new House();
@@ -58,6 +60,34 @@ public class HouseService {
                     
         houseRepository.save(house);
     }  
+    
+    @Transactional
+//  ＜店舗情報編集＞
+    public void update(HouseEditForm houseEditForm) {
+        House house = houseRepository.getReferenceById(houseEditForm.getId());
+        MultipartFile imageFile = houseEditForm.getImageFile();
+        
+        if (!imageFile.isEmpty()) {
+            String imageName = imageFile.getOriginalFilename(); 
+            String hashedImageName = generateNewFileName(imageName);
+            Path filePath = Paths.get("src/main/resources/static/storage/" + hashedImageName);
+            copyImageFile(imageFile, filePath);
+            house.setImageName(hashedImageName);
+        }
+        
+        house.setName(houseEditForm.getName());                
+        house.setDescription(houseEditForm.getDescription());
+        house.setPriceMax(houseEditForm.getPriceMax());
+        house.setPriceMin(houseEditForm.getPriceMin());
+        house.setCapacity(houseEditForm.getCapacity());
+        house.setPostalCode(houseEditForm.getPostalCode());
+        house.setAddress(houseEditForm.getAddress());
+        house.setPhoneNumber(houseEditForm.getPhoneNumber());
+                    
+        houseRepository.save(house);
+    }    
+    
+    
     
     // UUIDを使って生成したファイル名を変更し、create()メソッドに渡す
     public String generateNewFileName(String fileName) {

@@ -5,8 +5,7 @@
 		
 		<div th:replace="~{fragment :: styles}"></div>
 		
-		<title>店舗登録（管理者用）</title>
-		
+		<title>店舗情報編集（管理者用）</title>
 	</head>
 	<body>
 		<div class="samuraitravel-wrapper">
@@ -17,25 +16,32 @@
 				<div class="container pt-4 pb-5 samuraitravel-container">
 					<div class="row justify-content-center">
 						<div class="col-xl-6 col-lg-7 col-md-9">
+							
 <!--						パンくずリスト：style="--bs-breadcrumb-divider: '>';"はパンくずリストの区切り文字-->
 							<nav class="mb-4" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
 								<ol class="breadcrumb mb-0">
 									<li class="breadcrumb-item"><a th:href="@{/admin/houses}">店舗一覧</a></li>
-									<li class="breadcrumb-item active" aria-current="page">店舗登録</li>
+									<li class="breadcrumb-item"><a th:href="@{/admin/houses/__${houseEditForm.getId()}__}">店舗詳細</a></li>
+									<li class="breadcrumb-item active" aria-current="page">店舗情報編集</li>
 								</ol>
 							</nav>
 							
-							<h1 class="mb-4 text-center">店舗登録</h1>
+							<h1 class="mb-4 text-center">店舗情報編集</h1>
 							
-<!--							formy要素の説明-->
+<!--							form要素の説明-->
 <!--							・form要素の属性にpostを指定：get/postを指定できる-->
-<!--								HTML GET：単純にページを表示する場合など、サーバーから情報を取得するために使う-->
+<!--								HTML GET：単純にページを表示する場合など、サーバーから情報を取得するためにs￥使う-->
 <!--								HTML POST：フォーム入力内容を送信して、データの作成や更新を行う場合など、サーバー上のデータを変更するために使う-->
-<!--							・form要素にth:object属性：コントローラーから受け取ったインスタンスを指定する-->
-<!--							・th:action属性：Contorollerのどのメソッドに対してデータを送るかを指定(Contoroller側では『@PostMapping("/create")』で紐づけしている	)-->
+<!--							・th:object属性：コントローラーから受け取ったインスタンスを指定する-->
+<!--							・th:action属性：Contorollerのどのメソッドにデータを送るかを指定(Contoroller側では『@PostMapping("/{id}/update")』で紐づけしている	)-->
 <!--								インスタンスを受け取ることで、入力項目とフォームクラスのフィールドを関連付けできるようになる-->
 <!--							・form要素のenctype属性：フォーム入力内容を送信するためのエンコードタイプを指定-->
-							<form method="post" th:action="@{/admin/houses/create}" th:object="${houseRegisterForm}" enctype="multipart/form-data">
+							<form method="post" th:action="@{/admin/houses/__${houseEditForm.getId()}__/update}" th:object="${houseEditForm}" enctype="multipart/form-data">
+
+<!--							どのデータを更新するかを指定するため、id情報もeditページに渡す(type=hiddenでビュー上には表示されない)-->
+								<input type="hidden" th:field="*{id}">
+								
+								
 <!--							row: Bootstrapのグリッドシステムを使用して、水平方向に要素を配置するためのクラス-->
 <!--							店舗名の入力-->
 								<div class="form-group row mb-3">
@@ -48,13 +54,14 @@
 <!--									th:errors属性を加え、クラスで設定したメッセージを表示できる-->
 										<div th:if="${#fields.hasErrors('name')}" class="text-danger small mb-2" th:errors="*{name}"></div>
 										
-<!--									th:field属性　各入力項目とフォームクラスのフィールドを関連付けさせる-->
-<!--										th:fieldを設定するとid属性も同じ値になる-->
+<!--									th:field属性：各入力項目とフォームクラスのフィールドを関連付けさせる-->
+<!--										th:fieldを設定するとid属性も同じ値になり、そのフィールドに値が入っている場合は、その値がvalue属性に設定される-->
 										<input type="text" class="form-control" th:field="*{name}" autofocus>
 									</div>
 								</div>	
+								
 									
-<!--							民宿画像のアップロード-->
+<!--							店舗画像のアップロード-->
 								<div class="form-group row mb-3">
 									<div class="col-md-4">
 										<label for="imageFile" class="col-form-label text-md-left fw-bold">店舗画像</label>
@@ -64,9 +71,12 @@
 										<input type="file" class="form-control" th:field="*{imageFile}">
 									</div>
 								</div>
+								
 <!--								選択された画像の表示場所-->
-									<div class="row" id="imagePreview"></div>
-
+									<div th:if="${imageName}" class="row" id="imagePreview"><img th:src="@{/storage/__${imageName}__}" class="mb-3"></div>
+									<div th:unless="${imageName}" class="row" id="imagePreview"></div>
+									
+									
 <!--							説明入力-->
 								<div class="form-group row mb-3">
 									<div class="col-md-4">
@@ -79,10 +89,10 @@
 								</div>
 
 								
-<!--							最大料金入力-->
+<!--							最大利用料金入力-->
 								<div class="form-group row mb-3">
 									<div class="col-md-4">
-										<label for="price" class="col-form-label text-md-left fw-bold">最大利用料金 (単位：円)</label>
+										<label for="priceMax" class="col-form-label text-md-left fw-bold">最大利用料金 (単位：円)</label>
 									</div>
 									<div class="col-md-8">
 										<div th:if="${#fields.hasErrors('priceMax')}" class="text-danger small mb-2" th:errors="*{priceMax}"></div>
@@ -90,10 +100,10 @@
 									</div>
 								</div>
 								
-<!--							最小料金入力-->
+<!--							最小利用料金入力-->
 								<div class="form-group row mb-3">
 									<div class="col-md-4">
-										<label for="price" class="col-form-label text-md-left fw-bold">最小利用料金 (単位：円)</label>
+										<label for="priceMin" class="col-form-label text-md-left fw-bold">最小利用料金 (単位：円)</label>
 									</div>
 									<div class="col-md-8">
 										<div th:if="${#fields.hasErrors('priceMin')}" class="text-danger small mb-2" th:errors="*{priceMin}"></div>
@@ -112,6 +122,7 @@
 									</div>
 								</div>
 								
+								
 <!--							郵便番号入力-->
 								<div class="form-group row mb-3">
 									<div class="col-md-4">
@@ -123,6 +134,7 @@
 									</div>
 								</div>
 								
+								
 <!--							住所入力-->
 								<div class="form-group row mb-3">
 									<div class="col-md-4">
@@ -133,6 +145,7 @@
 										<input type="text" class="form-control" th:field="*{address}">
 									</div>
 								</div>
+
 
 <!--							電話番号入力-->
 								<div class="form-group row mb-3">
@@ -146,7 +159,7 @@
 								</div>
 									
 								<div class="form-group d-flex justify-content-center my-4">
-									<button type="submit" class="btn text-white shadow-sm w-50 samuraitravel-btn">登録</button>
+									<button type="submit" class="btn text-white shadow-sm w-50 samuraitravel-btn">更新</button>
 								</div>
 							</form>
 						</div>

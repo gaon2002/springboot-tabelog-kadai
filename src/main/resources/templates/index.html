@@ -15,11 +15,12 @@
 			
 			<main>
 				<div class="container pt-4 pb-5 samuraitravel-container">
-<!--				th:if属性に"${param.loggedIn}"を指定し、errorパラメータが存在する場合にのみエラーメッセージが表示される-->
+<!--				th:if属性に"${param.loggedIn}"を指定し、WebSecurityConfigでリダイレクト先が『.defaultSuccessUrl("/?loggedIn")』となった時に表示される-->
 					<div th:if="${param.loggedIn}" class="alert alert-info">
 						ログインしました。
 					</div>
 					
+<!--				th:if属性に"${param.loggedOut}"を指定し、WebSecurityConfigでリダイレクト先が『.failureUrl("/login?error")』となった時に表示される-->
 					<div th:if="${param.loggedOut}" class="alert alert-info">
 						ログアウトしました。
 					</div>
