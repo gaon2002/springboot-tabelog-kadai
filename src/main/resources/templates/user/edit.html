@@ -129,15 +129,15 @@
                                     		</div>
                                     	</label>
                                     </div>
+                                    
 									 <div class="col-md-7">
-									    <div th:if="${userEditForm.subscribe == 2}">
-                                            <button type="submit" th:field="*{subscribe}" value="3" id="subscribeNo" class="btn text-white shadow-sm w-50 samuraitravel-btn">月額利用をやめる</button>
-                                        </div>
-                                        <div th:if="${userEditForm.subscribe == 3}">
-                                            <button type="submit" th:field="*{subscribe}" value="2" id="subscribeYes" class="btn text-white shadow-sm w-50 samuraitravel-btn">月額利用を開始する</button>
-                                        </div>
+										<select class="form-control form-select" name="subscribe">  
+                                                 <option value="" hidden>選択してください</option>   
+                                                 <option value="2" th:selected="${subscribe == '2'}">月額利用を開始する</option>                                                
+                                                 <option value="3" th:selected="${subscribe == '3'}">月額利用をやめる</option>
+                                        </select>
 									 </div>
-								</div>   
+                                </div>
                                 
                                 <div class="row pb-2 mb-2 border-bottom">                                                                                                                         
                                 

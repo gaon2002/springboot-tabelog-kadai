@@ -95,7 +95,7 @@
 							<!-- 第１引数：成形する整数 -->
 							<!-- 第２引数：最小桁数（指定した桁数に満たない場合、先頭に0が追加される） -->
 							<!-- 第３引数：区切り位置（'COMMA', 'POINT', 'WHITESPACE'など） -->
-							<span th:text="${#numbers.formatInteger(house.getPriceMax(), 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(house.getPriceMin(), 1, 'COMMA') + '円'}"></span>
+							<span th:text="${#numbers.formatInteger(house.getPriceMin(), 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(house.getPriceMax(), 1, 'COMMA') + '円'}"></span>
 						</div>
 					</div>
 					

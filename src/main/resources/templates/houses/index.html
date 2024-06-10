@@ -1,0 +1,186 @@
+<!--店舗一覧詳細検索（会員用：houses/index.html）-->
+
+ <!DOCTYPE html>
+ <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+     <head>
+         <div th:replace="~{fragment :: meta}"></div>   
+              
+         <div th:replace="~{fragment :: styles}"></div>
+           
+         <title>店舗一覧（会員用）</title>   
+     </head>
+     <body>
+         <div class="samuraitravel-wrapper">
+             <!-- ヘッダー -->
+             <div th:replace="~{fragment :: header}"></div>
+             
+             <main>
+                 <div class="container samuraitravel-container pb-5">
+                     <div class="row justify-content-center">
+                         <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                             <ol class="breadcrumb mb-0">                        
+                                 <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+                                 <li class="breadcrumb-item active" aria-current="page">店舗一覧</li>
+                             </ol>
+                         </nav>         
+             
+                         <div class="col-xl-3 col-lg-4 col-md-12">               
+                             <form method="get" th:action="@{/houses}" class="w-100 mb-3">
+                                 <div class="input-group">
+                                     <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="店舗名・目的地">
+                                     <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button> 
+                                 </div>               
+                             </form>
+             
+                             <div class="card mb-3">
+                                 <div class="card-header">
+                                     エリアから探す
+                                 </div>
+                                 <div class="card-body">
+                                     <form method="get" th:action="@{/houses}" class="w-100">
+                                         <div class="form-group mb-3">
+                                             <select class="form-control form-select" name="area">  
+                                                 <option value="" hidden>選択してください</option>   
+<!--                                                 th:selected属性：値に指定された条件式がtrueの場合にのみ選択状態になる機能。-->
+<!--                                                 areaパラメータの値によって選択状態を動的に変更したい場合に便利-->
+                                                     <option value="中区" th:selected="${area == '中区'}">中区</option>                                                
+                                                     <option value="中村区" th:selected="${area == '中村区'}">中村区</option>
+                                                     <option value="昭和区" th:selected="${area == '昭和区'}">昭和区</option>
+                                                     <option value="瑞穂区" th:selected="${area == '瑞穂区'}">瑞穂区</option>
+                                                     <option value="熱田区" th:selected="${area == '熱田区'}">熱田区</option>
+                                                     <option value="中川区" th:selected="${area == '中川区'}">中川区</option>                                                                                       
+                                             </select> 
+                                         </div>
+                                         <div class="form-group">
+                                             <button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">検索</button>
+                                         </div>                                           
+                                     </form>
+                                 </div>
+                             </div>                
+             
+                             <div class="card mb-3">
+                                 <div class="card-header">
+                                     利用金額から探す
+                                 </div>
+                                 <div class="card-body">
+                                     <form method="get" th:action="@{/houses}" class="w-100">
+                                         <div class="form-group mb-3">    
+                                             <select class="form-control form-select" name="priceMin">
+                                                 <option value="" hidden>選択してください</option> 
+                                                 <option value="" th:selected="${priceMax == null}">下限なし</option>
+                                                 <option value="1000" th:selected="${priceMin == 1000}">1,000円以上</option>
+                                                 <option value="2000" th:selected="${priceMin == 2000}">2,000円以上</option>
+                                                 <option value="3000" th:selected="${priceMin == 3000}">3,000円以上</option>
+                                                 <option value="4000" th:selected="${priceMin == 4000}">4,000円以上</option>
+                                                 <option value="5000" th:selected="${priceMin == 5000}">5,000円以上</option>
+                                             </select>                                                                                
+                                         </div>
+                                         
+                                         <div class="form-group mb-3">    
+                                             <select class="form-control form-select" name="priceMax">
+                                                 <option value="" hidden>選択してください</option> 
+                                                 <option value="" th:selected="${priceMax == null}">上限なし</option>
+                                                 <option value="6000" th:selected="${priceMax == 6000}">6,000円以内</option>
+                                                 <option value="7000" th:selected="${priceMax == 7000}">7,000円以内</option>
+                                                 <option value="8000" th:selected="${priceMax == 8000}">8,000円以内</option>
+                                                 <option value="9000" th:selected="${priceMax == 9000}">9,000円以内</option>
+                                                 <option value="10000" th:selected="${priceMax == 10000}">10,000円以内</option>
+                                             </select>                                                                                
+                                         </div>
+                                         
+                                         
+                                         <div class="form-group">
+                                             <button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">検索</button>
+                                         </div>                                           
+                                     </form>
+                                 </div>
+                             </div>                               
+                         </div>
+             
+                         <div class="col">                                                                          
+                             <div class="d-flex justify-content-between flex-wrap">      
+<!--							検索結果表示                          -->
+                                 <p th:if="${housePage.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePage.getTotalElements() + '件' + '（' + (housePage.getNumber() + 1) + ' / ' + housePage.getTotalPages() + ' ページ）'}"></p> 
+                                 <p th:unless="${housePage.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePage.getTotalElements() + '件'}"></p>     
+                                       
+<!--                            並べ替え-->
+                                 <form method="get" th:action="@{/houses}" class="mb-3 samuraitravel-sort-box"> 
+<!--								並べ替え時にも検索状態が反映されるように、検索用のパラメータが存在する場合はinput type="hidden"でその値も送信する-->
+                                     <input th:if="${keyword}" type="hidden" name="keyword" th:value="${keyword}">
+                                     <input th:if="${area}" type="hidden" name="area" th:value="${area}">
+                                     <input th:if="${priceMin}" type="hidden" name="priceMin" th:value="${priceMin}">    
+                                     
+<!--                                     『onChange="this.form.submit();"』設定：select要素が変更されたときにJavaScriptが自動的にフォームを送信するようになる                              -->
+	                                     <select class="form-select form-select-sm" name="order" onChange="this.form.submit();">
+	                                         <option value="createdAtDesc" th:selected="${order == 'createdAtDesc' || order == null}">新着順</option>                                            
+	                                         <option value="priceMinAsc" th:selected="${order == 'priceMinAsc'}">最小料金が安い順</option>
+	                                     </select>   
+                                 </form>    
+                                                       
+                             </div>   
+                             
+<!--                         右側の詳細ページ                      -->
+                             <div class="mb-3" th:each="house : ${housePage}">
+                                 <a th:href="@{/houses/__${house.getId()}__}" class="link-dark samuraitravel-card-link">
+                                     <div class="card h-100">   
+                                         <div class="row g-0">
+                                             <div class="col-md-4">                                                                                
+                                                 <img th:if="${house.getImageName()}" th:src="@{/storage/__${house.getImageName()}__}" class="card-img-top samuraitravel-horizontal-card-image" alt="店舗画像">                                                     
+                                                 <img th:unless="${house.getImageName()}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-horizontal-card-image" alt="NO IMAGE">                                                    
+                                             </div> 
+                                             <div class="col-md-8">                                                                                                                        
+                                                 <div class="card-body">                                    
+                                                     <h3 class="card-title mb-3" th:text="${house.getName()}"></h3>                                            
+  
+                                                     <hr class="mb-3">
+                                                     
+                                                     <p class="card-text mb-2">
+                                                         <span th:text="${house.getDescription()}"></span>
+                                                     </p>                                                    
+                                                     
+                                                     <p class="card-text mb-2">
+                                                         <small class="text-muted" th:text="${'〒' + house.getPostalCode()}"></small>
+                                                         <small class="text-muted" th:text="${house.getAddress()}"></small>                                                      
+                                                     </p>   
+                                                                                                                                                                                                                                    
+                                                     <p class="card-text">
+                                                         <span th:text="${#numbers.formatInteger(house.getPriceMin(), 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(house.getPriceMax(), 1, 'COMMA') + '円'}"></span>
+                                                     </p>                                    
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </div>    
+                                 </a>            
+                             </div>                                                                                       
+             
+                             <!-- ページネーション -->
+                             <div th:if="${housePage.getTotalPages() > 1}" class="d-flex justify-content-center">
+                                 <nav aria-label="店舗一覧ページ">
+                                     <ul class="pagination">
+                                         <li class="page-item">
+                                             <span th:if="${housePage.isFirst()}" class="page-link disabled">前</span>
+                                             <a th:unless="${housePage.isFirst()}" th:href="@{/houses(page = ${housePage.getNumber() - 1}, keyword = ${keyword}, area = ${area}, priceMin = ${priceMin}, priceMax = ${priceMax}, order = ${order})}" class="page-link samuraitravel-page-link">前</a>
+                                         </li>
+                                         <li th:each="i : ${#numbers.sequence(0, housePage.getTotalPages() - 1)}" class="page-item">
+                                             <span th:if="${i == housePage.getNumber()}" class="page-link active samuraitravel-active" th:text="${i + 1}"></span>
+                                             <a th:unless="${i == housePage.getNumber()}" th:href="@{/houses(page = ${i}, keyword = ${keyword}, area = ${area}, priceMin = ${priceMin}, priceMax = ${priceMax}, order = ${order})}" class="page-link samuraitravel-page-link" th:text="${i + 1}"></a>
+                                         </li>
+                                         <li class="page-item">                        
+                                             <span th:if="${housePage.isLast()}" class="page-link disabled">次</span>
+                                             <a th:unless="${housePage.isLast()}" th:href="@{/houses(page = ${housePage.getNumber() + 1}, keyword = ${keyword}, area = ${area}, priceMin = ${priceMin}, priceMax = ${priceMax}, order = ${order})}" class="page-link samuraitravel-page-link">次</a>
+                                         </li>
+                                     </ul>
+                                 </nav> 
+                             </div>                                      
+                         </div>
+                     </div>
+                 </div>  
+             </main>
+             
+             <!-- フッター -->
+             <div th:replace="~{fragment :: footer}"></div>
+         </div>    
+         
+         <div th:replace="~{fragment :: scripts}"></div>  
+   </body>
+ </html>

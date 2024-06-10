@@ -52,7 +52,7 @@ public class UserService {
 //      パスワードはハッシュ化：SpringSecurityが提供するPasswordEncoderインターフェースのencode()メソッドを利用。
         user.setPassword(passwordEncoder.encode(signupForm.getPassword()));
         user.setRole(role);
-        user.setSubscribe(signupForm.getSubscribe());
+        user.setSubscribe(subscribe);
 //      メール認証が完了するまで、falseとする
         user.setEnabled(false);        
         
@@ -81,7 +81,10 @@ public class UserService {
         user.setPostalCode(userEditForm.getPostalCode());
         user.setAddress(userEditForm.getAddress());
         user.setPhoneNumber(userEditForm.getPhoneNumber());
-        user.setEmail(userEditForm.getEmail());      
+        user.setEmail(userEditForm.getEmail());
+        user.setRole(role);
+        user.setSubscribe(subscribe);
+//      メール認証が完了するまで、falseとする
         
         userRepository.save(user);
     }    

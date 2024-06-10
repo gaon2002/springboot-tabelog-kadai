@@ -86,7 +86,7 @@ public class AuthController {
         
         model.addAttribute ("successMessage", "ご入力いただいたメールアドレスに認証メールを送信しました。メールに記載されているリンクをクリックし、会員登録を完了してください。");  
 
-        return "auth/verify"; 
+        return "auth/signup"; 
     }    
     
 //  メール認証用URL（/signup/verify）を受け取りUrl内のtokenと、verificationToken内のtokenが一致するかを確認し、ユーザーを有効化する

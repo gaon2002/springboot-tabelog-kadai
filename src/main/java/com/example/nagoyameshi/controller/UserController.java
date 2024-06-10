@@ -54,6 +54,7 @@ public class UserController {
         return "user/edit";
     }    
     
+//    編集されたユーザー情報を更新する
     @PostMapping("/update")
     public String update(@ModelAttribute @Validated UserEditForm userEditForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         // メールアドレスが変更されており、かつ登録済みであれば、BindingResultオブジェクトにエラー内容を追加する
@@ -66,9 +67,12 @@ public class UserController {
             return "user/edit";
         }
         
+//      userServiceのupdate()メソッドを実行
         userService.update(userEditForm);
+        
         redirectAttributes.addFlashAttribute("successMessage", "会員情報を編集しました。");
         
+//      user/index.htmlに戻って表示
         return "redirect:/user";
     }    
 

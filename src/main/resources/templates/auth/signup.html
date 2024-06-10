@@ -14,6 +14,22 @@
              <!-- ヘッダー -->
              <div th:replace="~{fragment :: header}"></div>
              
+             <div class="container pt-4 pb-3 samuraitravel-container">
+	             <div class="row justify-content-center">
+		             <div class="col-xl-6 col-lg-7 col-md-9">  
+<!--			         成功メッセージ-->
+			             <div th:if="${successMessage}" class="alert alert-info">
+			            	 <span th:text="${successMessage}"></span>
+			             </div> 
+<!--         			 エラーメッセージ-->
+			             <div th:if="${errorMessage}" class="alert alert-danger">
+			             	<span th:text="${errorMessage}"></span>
+			             </div>
+		             </div>
+	             </div>
+             </div>
+             
+             
              <main>
                  <div class="container pt-4 pb-5 samuraitravel-container">
                      <div class="row justify-content-center">

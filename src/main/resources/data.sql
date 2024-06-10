@@ -60,6 +60,7 @@ INSERT IGNORE INTO houses (id, name, image_name, description, price_max,price_mi
 INSERT IGNORE INTO houses (id, name, image_name, description, price_max,price_min, capacity, postal_code, address, phone_number) VALUES (59,'地酒と創作和食 吟','washoku_02.jpg','四季折々の旬の食材を使った本格和食が自慢。職人の技が光る料理を、心地よい雰囲気の中でご堪能ください。',4000,8000,50,'466-0006','名古屋市昭和区松風町6丁目30-31','052-567-4567');
 INSERT IGNORE INTO houses (id, name, image_name, description, price_max,price_min, capacity, postal_code, address, phone_number) VALUES (60,'彩り和食亭 さくら','washoku_03.jpg','地元の新鮮な食材を使った多彩な料理をご提供。心温まる和の雰囲気で、贅沢なひとときをお過ごしください。',1500,5500,60,'454-0002','名古屋市中川区新風町9丁目54-55','052-789-9012');
 
+
 -- rolesテーブル
 INSERT IGNORE INTO roles (id,name) VALUES (1,'ROLE_ADMIN');
 INSERT IGNORE INTO roles (id,name) VALUES (2,'ROLE_PAID');
@@ -96,3 +97,24 @@ INSERT IGNORE INTO users (id,role_id,name,furigana,postal_code,address,phone_num
 INSERT IGNORE INTO users (id,role_id,name,furigana,postal_code,address,phone_number,email,password,enabled,subscribe) VALUES (28,3,'杉本 二十六郎','スギモト ニジュウロクロウ','890-1234','東京都中央区八重洲28-27-28','090-8901-2345','sugimoto@example.com','password',1,3);
 INSERT IGNORE INTO users (id,role_id,name,furigana,postal_code,address,phone_number,email,password,enabled,subscribe) VALUES (29,3,'松井 二十七郎','マツイ ニジュウシチロウ','901-2345','東京都荒川区日暮里29-28-29','080-9012-3456','matsui@example.com','password',1,3);
 INSERT IGNORE INTO users (id,role_id,name,furigana,postal_code,address,phone_number,email,password,enabled,subscribe) VALUES (30,3,'土屋 二十八郎','ツチヤ ニジュウハチロウ','012-3456','東京都品川区西大井30-29-30','070-0123-4567','tsuchiya@example.com','password',1,3);
+
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(1,1,4, '2023-06-01','10:00:00', 2);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(2,1,6, '2023-06-02','11:00:00', 4);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(3,1,7, '2023-06-03','12:00:00', 3);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(4,2,4, '2023-06-04','13:00:00', 5);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(5,2,6, '2023-06-05','14:00:00', 2);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(6,2,7, '2023-06-06','15:00:00', 1);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(7,3,4, '2023-06-07','16:00:00', 6);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(8,3,6, '2023-06-08','17:00:00', 4);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(9,3,7, '2023-06-09','18:00:00', 3);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(10,4,4, '2023-06-10','19:00:00', 5);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(11,4,6, '2023-06-11','10:30:00', 2);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(12,4,7, '2023-06-12','11:30:00', 4);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(13,5,4, '2023-06-13','12:30:00', 3);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(14,5,6, '2023-06-14','13:30:00', 5);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(15,5,7, '2023-06-15','14:30:00', 2);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(16,6,4, '2023-06-16','15:30:00', 1);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(17,6,6, '2023-06-17','16:30:00', 6);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(18,6,7, '2023-06-18','17:30:00', 4);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(19,7,4, '2023-06-19','18:30:00', 3);
+INSERT IGNORE INTO reservations (id, house_id, user_id, reserved_date, reserved_time, number_of_people) VALUES(20,7,6, '2023-06-20','19:30:00', 5);
