@@ -8,6 +8,10 @@
 		
 		<!-- Flatpickr -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/material_green.css">
+        
+        <!-- フォントアイコンのスタイル -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 		
 		<title>店舗詳細</title>
 	</head>
@@ -150,28 +154,70 @@
 									</div>
 									
 <!--								■予約フォーム-->
-<!--									<div sec:authorize="isAuthenticated()" class="col-lg-4 px-0 ps-lg-4 mb-4">-->
-<!--										<div class="card">-->
-<!--											<div class="card-body">-->
-<!--												<form method="get" th:action="@{/houses/__${house.getId()}__/reservations/input}" th:object="${reservationInputForm}">-->
-<!--													<div class="form-group mb-2">-->
-<!--														<label for="fromCheckinDateToCheckoutDate" class="col-form-label text-md-left fw-bold">利用日時</label>-->
-<!--														<div th:if="${#fields.hasErrors('fromCheckinDateToCheckoutDate')}" class="text-danger small mb-2" th:errors="*{fromCheckinDateToCheckoutDate}"></div>-->
-<!--														<input type="text" class="form-control" th:field="*{fromCheckinDateToCheckoutDate}">-->
-<!--													</div>-->
-<!--													<div class="form-group mb-4">-->
-<!--														<label for="numberOfPeople" class="col-form-label text-md-left fw-bold">利用人数</label>-->
-<!--														<div th:if="${#fields.hasErrors('numberOfPeople')}" class="text-danger small mb-2" th:errors="*{numberOfPeople}"></div>-->
-<!--														<input type="number" class="form-control" th:field="*{numberOfPeople}" min="1">-->
-<!--													</div>-->
+									<div sec:authorize="isAuthenticated()" class="col-lg-4 px-0 ps-lg-4 mb-4">
+										<div class="card">
+											<div class="card-body">
+												
+												<form method="get" th:action="@{/houses/__${house.getId()}__/reservations/input}" th:object="${reservationInputForm}">
+													
+													<div class="form-group mb-2">
+<!--													利用日選択-->
+														<label for="reservedDate" class="col-form-label text-md-left fw-bold">ご利用日</label>
+<!--													エラーがある場合表示-->
+														<div th:if="${#fields.hasErrors('reservedDate')}" class="text-danger small mb-2" th:errors="*{reservedDate}"></div>
+
+														<div class="input-group" id="reservedDate">
+<!--													カレンダーの表示-->
+														<input type="text" class="form-control" th:field="*{reservedDate}" placeholder="Select Date.." data-input>
+<!--													カレンダーボタン-->
+															<a class="input-button" title="toggle" data-toggle>
+      														<i class="icon-calendar fa fa-calendar"></i>
+    														</a>
+<!--													クローズボタン-->
+															<a class="input-button" title="clear" data-clear>
+      														<i class="icon-close fa fa-times"></i>
+    														</a>
+    													</div>
+															
+													</div>
+													
+													<div class="form-group mb-2">
+<!--													利用時間選択-->
+														<label for="reservedTime" class="col-form-label text-md-left fw-bold">ご来店時間</label>
+<!--													エラーがある場合表示-->
+														<div th:if="${#fields.hasErrors('reservedTime')}" class="text-danger small mb-2" th:errors="*{reservedTime}"></div>
+
+														<div class="input-group" id="reservedTime">
+<!--													カレンダーの表示-->
+														<input type="text" class="form-control" th:field="*{reservedTime}" placeholder="Select Date.." data-input>
+<!--													カレンダーボタン-->
+															<a class="input-button" title="toggle" data-toggle>
+      														<i class="icon-calendar fa fa-calendar"></i>
+    														</a>
+<!--													クローズボタン-->
+															<a class="input-button" title="clear" data-clear>
+      														<i class="icon-close fa fa-times"></i>
+    														</a>
+    													</div>
+															
+													</div>
+													
+<!--												利用人数						-->
+													<div class="form-group mb-4">
+														<label for="numberOfPeople" class="col-form-label text-md-left fw-bold">利用人数</label>
+														<div th:if="${#fields.hasErrors('numberOfPeople')}" class="text-danger small mb-2" th:errors="*{numberOfPeople}"></div>
+														<input type="number" class="form-control" th:field="*{numberOfPeople}" min="1">
+													</div>
 																										
-<!--													<div class="form-group">-->
-<!--														<button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">予約する</button>-->
-<!--													</div>-->
-<!--												</form>-->
-<!--											</div>-->
-<!--										</div>-->
-<!--									</div>-->
+													<div class="form-group">
+														<button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">予約する</button>
+													</div>
+													
+												</form>
+												
+											</div>
+										</div>
+									</div>
 									
 <!--								■レビューを表示(2列×3行)-->
 									<div class="container px-0">
@@ -272,8 +318,11 @@
 		<div th:replace="~{fragment :: scripts}"></div>
 		
 		<!-- Flatpickr -->
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+<!--        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>-->
+<!--        <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+  		<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ja.js"></script>
+        
 <!--    このJSファイルで、カレンダーの表示範囲など、Flatpickrに関する各種設定-->
         <script th:src="@{/js/flatpickr.js}"></script> 
 		

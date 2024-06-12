@@ -133,6 +133,35 @@ footer{
     overflow-y: auto;
 }
 
+/*予約カレンダーのスタイル設定*/
+.input-group {
+    display: flex;
+    align-items: center;
+}
+.input-group input {
+    border: 1px solid #c3c3c3;
+    height: 36px;
+    line-height: 36px;
+    width: 80%;
+    padding: 4px;
+    max-width: 360px;
+    border-radius: 4px;
+    background: #fff;
+}
+a.input-button {
+    text-decoration: none;
+    border: none;
+    display: block;
+    padding: 13px;
+    border-left: 0;
+    cursor: pointer;
+    align-self: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+
+
 @media screen and (min-width: 1400px){
 	.samuraitravel-container{
 		max-width: 1200px;
