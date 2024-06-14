@@ -48,12 +48,13 @@
 						<div class="col" th:each="newHouse : ${newHouses}">
 							<a th:href="@{/houses/__${newHouse.getId()}__}" class="link-dark samuraitravel-card-link">
 								<div class="card h-100">
+<!--								店舗画像-->
 									<img th:if="${newHouse.getImageName()}" th:src="@{/storage/__${newHouse.getImageName()}__}" class="card-img-top samuraitravel-vertical-card-image" alt="店舗画像">
 									<img th:unless="${newHouse.getImageName()}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-vertical-card-image" alt="NO IMAGE">
 									<div class="card-body">
 										<h3 class="card-title" th:text="${newHouse.getName()}"></h3>
 										<p class="card-text mb-1">
-<!--										・"text-muted"：テキストを灰色にする-->btn btn-info btn-sm shadow 
+<!--										・"text-muted"：テキストを灰色にする-->
 											<small class="text-muted" th:text="${newHouse.getAddress()}"></small>
 										</p>
 										<p class="card-text">

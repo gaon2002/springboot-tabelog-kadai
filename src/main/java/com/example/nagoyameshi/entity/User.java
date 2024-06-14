@@ -1,6 +1,12 @@
 package com.example.nagoyameshi.entity;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Collections;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,9 +58,41 @@ public class User {
     @Column(name = "subscribe")
     private Integer subscribe;
     
+    @Column(name = "age")
+    private Integer age;
+    
+    @Column(name = "birthday")
+    private Date birthday;
+    
+    @Column(name = "remember_token")
+    private String rememberToken;
+    
+    @Column(name = "subscription_start_date")
+    private Date subscriptionStartDate;
+    
+    @Column(name = "subscription_end_date")
+    private Date subscriptionEndDate;
+    
     @Column(name = "created_at", insertable = false, updatable = false)
     private Timestamp createdAt;
     
     @Column(name = "updated_at", insertable = false, updatable = false)
     private Timestamp updatedAt;     
+    
+    
+    public Collection<GrantedAuthority> getRoles() {
+    	
+    	if (subscribe != null) {
+    		
+            if (subscribe.equals(2)) {
+            	return Collections.singletonList(new SimpleGrantedAuthority("ROLE_PAID"));
+            	
+            }if (subscribe.equals(3)) {
+            	return Collections.singletonList(new SimpleGrantedAuthority("ROLE_FREE"));
+            	
+            }
+        }
+        return Collections.emptyList();
+    }
+    
 }

@@ -2,6 +2,13 @@ package com.example.nagoyameshi.controller;
 //認証機能（ログイン、会員登録）用のコントローラ
 
 
+import java.util.Collection;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,10 +24,13 @@ import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.entity.VerificationToken;
 import com.example.nagoyameshi.event.SignupEventPublisher;
 import com.example.nagoyameshi.form.SignupForm;
+import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.UserService;
 import com.example.nagoyameshi.service.VerificationTokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+
 
 @Controller
 public class AuthController {
@@ -31,10 +41,14 @@ public class AuthController {
     
     private final VerificationTokenService verificationTokenService;
     
+
+    
     public AuthController(UserService userService, SignupEventPublisher signupEventPublisher, VerificationTokenService verificationTokenService) {      
         this.userService = userService;        
         this.signupEventPublisher = signupEventPublisher;
         this.verificationTokenService = verificationTokenService;
+//        this.userDetailsServiceImpl userDetailsServiceImpl;
+        
     }  
 	
 	
@@ -103,6 +117,9 @@ public class AuthController {
             User user = verificationToken.getUser();  
 //          対象のユーザーを有効にするメソッドを実行
             userService.enableUser(user);
+//			ユーザーの自動ログイン
+            authenticateUser(user); 
+            
             String successMessage = "会員登録が完了しました。";
             model.addAttribute("successMessage", successMessage);            
         } else {
@@ -110,7 +127,20 @@ public class AuthController {
             model.addAttribute("errorMessage", errorMessage);
         }
         
+        
 //      会員用の店舗一覧に戻りたい
-        return "auth/verify";         
+        return "auth/verify";   
+        
     }    
+
+   
+    
+//  メール認証後ログイン状態にしておくためのメソッド
+    private void authenticateUser(User user) {
+    	Collection<GrantedAuthority> authorities = user.getRoles();  // userからroles/authoritiesを取得
+    	UserDetails userDetails = new UserDetailsImpl(user, authorities);  // authoritiesも渡す
+    	Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    	SecurityContextHolder.getContext().setAuthentication(auth);
+        
+    }
 }

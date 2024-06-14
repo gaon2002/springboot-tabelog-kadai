@@ -45,6 +45,8 @@ public class UserService {
         
         user.setName(signupForm.getName());
         user.setFurigana(signupForm.getFurigana());
+        user.setBirthday(signupForm.getBirthday());
+        user.setAge(signupForm.getAge());
         user.setPostalCode(signupForm.getPostalCode());
         user.setAddress(signupForm.getAddress());
         user.setPhoneNumber(signupForm.getPhoneNumber());
@@ -78,6 +80,8 @@ public class UserService {
         
         user.setName(userEditForm.getName());
         user.setFurigana(userEditForm.getFurigana());
+        user.setBirthday(userEditForm.getBirthday());
+        user.setAge(userEditForm.getAge());
         user.setPostalCode(userEditForm.getPostalCode());
         user.setAddress(userEditForm.getAddress());
         user.setPhoneNumber(userEditForm.getPhoneNumber());

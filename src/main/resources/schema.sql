@@ -24,21 +24,27 @@ CREATE TABLE IF NOT EXISTS houses (
  
 -- usersテーブル生成とフィールド設定のコマンド
  CREATE TABLE IF NOT EXISTS users (
-     id				INT				NOT NULL AUTO_INCREMENT PRIMARY KEY,
-     role_id		INT				NOT NULL,
-     name			VARCHAR(50) 	NOT NULL,
-     furigana		VARCHAR(50) 	NOT NULL,
-     postal_code	VARCHAR(50) 	NOT NULL,
-     address		VARCHAR(255)	NOT NULL,
-     phone_number	VARCHAR(50) 	NOT NULL,
-     email			VARCHAR(255) 	NOT NULL UNIQUE,
-     password		VARCHAR(255) 	NOT NULL,    
-     enabled		BOOLEAN 		NOT NULL,
-     subscribe		INT				NOT NULL,
-     created_at		DATETIME 		NOT NULL DEFAULT CURRENT_TIMESTAMP,
-     updated_at		DATETIME 		NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,    
+     id							INT				NOT NULL AUTO_INCREMENT PRIMARY KEY,
+     role_id					INT				NOT NULL,
+     name						VARCHAR(50) 	NOT NULL,
+     furigana					VARCHAR(50) 	NOT NULL,
+     age						INT 			NOT NULL,
+     birthday 					DATE 			NOT NULL,
+     remember_token 			VARCHAR(255),
+     subscription_start_date 	DATE,
+     subscription_end_date 		DATE,
+     postal_code				VARCHAR(50) 	NOT NULL,
+     address					VARCHAR(255)	NOT NULL,
+     phone_number				VARCHAR(50) 	NOT NULL,
+     email						VARCHAR(255) 	NOT NULL UNIQUE,
+     password					VARCHAR(255) 	NOT NULL,    
+     enabled					BOOLEAN 		NOT NULL,
+     subscribe					INT				NOT NULL,
+     created_at					DATETIME 		NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updated_at					DATETIME 		NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,    
      FOREIGN KEY (role_id) REFERENCES roles (id)
  );
+
  
 -- verification_tokensテーブル生成とフィールド設定のコマンド
  CREATE TABLE IF NOT EXISTS verification_tokens (
@@ -63,4 +69,6 @@ CREATE TABLE IF NOT EXISTS houses (
      FOREIGN KEY (house_id) REFERENCES houses (id),
      FOREIGN KEY (user_id) REFERENCES users (id)
  );
+ 
+
  

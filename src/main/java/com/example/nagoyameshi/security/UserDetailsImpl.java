@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.example.nagoyameshi.entity.User;
 
 public class UserDetailsImpl implements UserDetails {
+	
     private final User user;
     private final Collection<GrantedAuthority> authorities;
     

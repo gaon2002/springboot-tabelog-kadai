@@ -2,6 +2,8 @@
 
 package com.example.nagoyameshi.form;
 
+import java.sql.Date;
+
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.validation.constraints.Email;
@@ -16,6 +18,12 @@ public class SignupForm {
     
     @NotBlank(message = "フリガナを入力してください。")
     private String furigana;
+    
+    @NotNull(message = "年齢を入力してください。")
+    private Integer age;
+    
+    @NotNull(message = "誕生日を入力してください。")
+    private Date birthday;
     
     @NotBlank(message = "郵便番号を入力してください。")
     private String postalCode;

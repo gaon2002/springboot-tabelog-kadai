@@ -50,6 +50,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 //            ・authorities.add()でこのコレクションに新しい要素を追加
             authorities.add(new SimpleGrantedAuthority(userRoleName));
             
+
+            
 //          ユーザー情報と権限リストをUserDetailsImplオブジェクトとして返す
             return new UserDetailsImpl(user, authorities);
             

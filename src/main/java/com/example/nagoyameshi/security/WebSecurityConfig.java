@@ -10,6 +10,7 @@ package com.example.nagoyameshi.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,7 +35,7 @@ public class WebSecurityConfig {
 		http
 			.authorizeHttpRequests((requests) -> requests
 					// すべてのユーザーにアクセスを許可するURL。 ()内にルートパスを記述する。
-					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/" ,"/signup/**", "/houses", "/houses/{id}", "/stripe/webhook","/houses/{id}/reviews/","/houses/*/reviews/**").permitAll()
+					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/" ,"/signup/**", "/houses", "/houses/{id}", "/stripe/webhook","/houses/{id}/reviews/","/houses/*/reviews/**","check-role").permitAll()
 					// 管理者のみのアクセスを許可するURL
 					.requestMatchers("/admin/**").hasRole("ADMIN")
 					// 上記以外はログインが必要（ロールは問わない）
@@ -58,13 +59,25 @@ public class WebSecurityConfig {
 					.logoutSuccessUrl("/?loggedOut")
 					.permitAll()
 			)
+			
 			// ★CSRFトークンを返すパスはCSRF対策から除外
 			// 　・CSRF（クロス・サイト・リクエスト・フォージェリ）:サイバー攻撃の一種。この攻撃を受けると「ログイン済みユーザーになりすましたアプリやサービスの利用」「アプリやサービスのデータ漏洩（ろうえい）」といった重大な問題が発生
 			// 　・今回のように外部からPOST送信を受ける場合、そのままではCSRF対策のチェックによってアクセスが拒否されてしまうので、「/stripe/webhook」に対するPOST送信についてはCSRF対策のチェックを行わないように設定
 			.csrf(csrf -> csrf.ignoringRequestMatchers("/stripe/webhook"));
+			
+
+		
 		
 		return http.build();
 	}
+	
+	 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+	        auth.inMemoryAuthentication()
+	                .withUser("user")
+	                .password(passwordEncoder().encode("password"))
+	                .roles("PAID");
+	    }
+
 	
 	@Bean //@Beanアノテーションを付けることで、そのメソッドの戻り値をDIコンテナに格納できる
 	// メソッド：パスワードのハッシュアルゴリズムを設定する
