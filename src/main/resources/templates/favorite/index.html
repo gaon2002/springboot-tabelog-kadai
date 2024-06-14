@@ -1,0 +1,131 @@
+<!--お気に入り一覧ページ-->
+
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ja">
+    <head>
+		<div th:replace="~{fragment :: meta}"></div>
+		
+        <div th:replace="~{fragment :: styles}"></div>
+        
+        <title>お気に入り一覧</title>       
+    </head>
+    <body>
+        <div class="samuraitravel-wrapper">
+            <!-- ヘッダー -->
+            <div th:replace="~{fragment :: header}"></div>
+            
+            <main>
+                <div class="container samuraitravel-container pb-5">
+                    <div class="row justify-content-center">
+<!--					■パンくずリスト-->
+                        <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+							<ol class="breadcrumb mb-0">
+								<li class="breadcrumb-item"><a th:href="@{/}">ホーム</a> </li>
+								<li class="breadcrumb-item active" aria-current="page">お気に入り一覧</li>
+							</ol>
+						</nav>
+						
+					</div>
+					
+					<div class="col">
+						<div class="d-flex justify-content-between flex-wrap">
+<!--						■検索件数の表示：「検索結果：57件（1 / 6 ページ）」と表現する-->
+<!--							・housePage.getTotalElements()：要素の総数（検索結果の件数）-->
+<!--							・housePage.getNumber() + 1：現在のページ番号（0から始まるので1を加算し、ユーザーがわかりやすいようにする）-->
+<!--							・housePage.getTotalPages()：総ページ数-->
+							<p th:if="${housePages.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePages.getTotalElements() + '件' + '(' + (housePages.getNumber() + 1) + '/' + housePages.getTotalPages() + 'ページ)'}"></p>
+							<p th:unless="${housePages.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePages.getTotalElements() + '件'}"></p>
+							
+						</div>
+						
+<!--					■お気に入り店舗一覧の表示-->
+<!--					■FavoriteControllerで設定した<List>が空であれば-->
+							
+						<div th:if="${#lists.isEmpty(housePages)}" class="mb-4">
+							 <p class="text-center">まだお気に入りが登録されていません。</p>
+						</div>
+										
+<!--					■HouseControllerで設定した<List>のnewReviewsが空でなければ-->
+						<div th:unless="${#lists.isEmpty(housePages)}" class="row row-cols-1 mb-4">
+<!--					■houseはhousePagesリストの中の一つ一つのレビューを参照するために使われる変数名-->
+						<div class="mb-3" th:each="housePages : ${housePages}">
+							<a th:href="@{/houses/__${housePages.getId()}__}" class="link-dark samuraitravel-card-link">
+								<div class="card h-100">
+									<div class="row g-0">
+										<div class="col-md-4">
+											<img th:if="${housePages.getImageName()}" th:src="@{/storage/__${housePages.getImageName()}__}" class="card-img-top samuraitravel-horizontal-card-image" alt="店舗画像">
+											<img th:unless="${housePages.getImageName()}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-horizontal-card-image" alt="NO IMAGE">
+										</div>
+										<div class="col-md-8">
+											<div class="card-body">
+												<h3 class="card-title mb-3" th:text="${housePages.getName()}"></h3>
+												
+												<hr class="mb-3">
+												
+												<p class="card-text mb-2">
+													<span th:text="${housePages.getDescription()}"></span>
+												</p>
+												
+												<p class="card-text mb-2">
+													<small class="text-muted" th:text="${'〒' + housePages.getPostalCode()}"></small>
+													<small class="text-muted" th:text="${housePages.getAddress()}"></small>
+												</p>
+												
+												<p class="card-text">
+													<span th:text="${#numbers.formatInteger(housePages.getPriceMin(), 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(housePages.getPriceMax(), 1, 'COMMA') + '円'}"></span>
+												</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</a>
+						</div>
+						</div>
+
+
+                        <!-- ページネーション -->
+                        <!-- getTotalPages() > 1：総ページ数が1より大きい時のみ、このdiv要素を表示する処理-->
+                        <div th:if="${housePages.getTotalPages() > 1}" class="d-flex justify-content-center">
+							<nav aria-label="お気に入り一覧ページ">
+								<ul class="pagination">
+									<li class="page-item">
+									<!-- th:if　で条件分岐させる、条件式はisFirst()メソッドを使う -->
+										
+										<span th:if="${housePages.isFirst()}" class="page-link disabled">前</span>
+										<!-- th:hrefの属性にpageパラメタを付ける
+										   th:unlssは条件式がfalseの時に適用される
+										   th:href、getNumber()メソッドを使って現在のページ番号を取得し、そこから1を減産して１つ前のページへのリンクを作成-->
+										<a th:unless="${housePages.isFirst()}" th:href="@{/favorite(page = ${housePages.getNumber() -1})}" class="page-link samuraitravel-page-link">前</a>
+									</li>
+									<!-- th:eachで、繰り返し処理
+									     #numbers.sequence：thymeleafのユーティリティオブジェクトを使い、ページ番号のリストを生成
+									     第1引数に開始値、第2引数に終了値を指定することで、その範囲の値でLISTを生成、第3引数はオプションで増分を指定・指定しない場合は1ずつ増える -->
+									<li th:each="i : ${#numbers.sequence(0, housePages.getTotalPages() -1)}" class="page-item">
+										<!-- 条件式にgetNumber
+										     現在のページ番号のリンクを無効にする
+										     現在のページと一致すればspan要素を表示(リンクなし)、一致しないときにa要素を表示 -->
+										<span th:if="${i == housePages.getNumber()}" class="page-link active samuraitravel-active" th:text="${i + 1}"></span>
+										<a th:unless="${i == housePages.getNumber()}" th:href="@{/favorite(page = ${i})}" class="page-link samuraitravel-page-link" th:text="${i + 1}"></a>
+									</li>
+									<li class="page-item">
+										<span th:if="${housePages.isLast()}" class="page-link disabled">次</span>
+										<a th:unless="${housePages.isLast()}" th:href="@{/favorite(page = ${housePages.getNumber() + 1})}" class="page-link samuraitravel-page-link">次</a>
+									</li>
+								</ul>
+							</nav>
+							
+						</div>
+ 					</div>
+                </div>        
+        </main>
+            
+        <!-- フッター -->
+        <div th:replace="~{fragment :: footer}"></div>
+
+        </div>    
+        
+        <!-- Bootstrap -->
+        <div th:replace="~{fragment :: scripts}"></div>
+
+    </body>
+</html>

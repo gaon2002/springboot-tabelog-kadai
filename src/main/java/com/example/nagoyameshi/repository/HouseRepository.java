@@ -46,4 +46,7 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
 	
 //  新着5件表示
     public List<House> findTop5ByOrderByCreatedAtDesc();
+    
+//  お気に入り一覧に表示するコマンド
+    public Page<House> findByIdIn(List<Integer> houseList, Pageable pageable);
 }

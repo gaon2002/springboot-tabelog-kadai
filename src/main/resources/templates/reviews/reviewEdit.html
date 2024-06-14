@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ja">
+	<head>
+		<div th:replace="~{fragment :: meta}"></div>
+		
+		<div th:replace="~{fragment :: styles}"></div>
+		
+		<title>レビュー登録</title>
+		
+	</head>
+	<body>
+		<div class="samuraitravel-wrapper">
+<!--			ヘッダー-->
+			<div th:replace="~{fragment :: header}"></div>
+			
+			<main>
+				<div class="container pt-4 pb-5 samuraitravel-container">
+					<div class="row justify-content-center">
+						<div class="col-xl-5 col-lg-6 col-md-8">
+<!--						パンくずリスト：style="--bs-breadcrumb-divider: '>';"はパンくずリストの区切り文字-->
+							<nav class="mb-4" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+								<ol class="breadcrumb mb-0">
+									<li class="breadcrumb-item"><a th:href="@{/houses}">店舗一覧</a></li>
+									<li class="breadcrumb-item active" aria-current="page">レビュー編集</li>
+								</ol>
+							</nav>
+							
+<!--						■エラーメッセージ-->
+							<div th:if="${errorMessage}" class="alert alert-danger">
+								<span th:text="${errorMessage}"></span>
+							</div>
+
+							<h1 class="mb-4 text-center" th:text="${house.getName()} + ' のレビュー編集'"></h1>
+							
+<!--							formy要素の説明-->
+<!--							・form要素の属性にpostを指定：get/postを指定できる-->
+<!--								HTML GET：単純にページを表示する場合など、サーバーから情報を取得するためにs￥使う-->
+<!--								HTML POST：フォーム入力内容を送信して、データの作成や更新を行う場合など、サーバー上のデータを変更するために使う-->
+<!--							・form要素にth:object属性：コントローラーから受け取ったインスタンスを指定する-->
+<!--							・th:action属性：Contorollerのどのメソッドに対してデータを送るかを指定(Contoroller側では『@PostMapping("/update")』で紐づけしている	)-->
+<!--								インスタンスを受け取ることで、入力項目とフォームクラスのフィールドを関連付けできるようになる-->
+<!--							・form要素のenctype属性：フォーム入力内容を送信するためのエンコードタイプを指定-->
+								<form method="post" th:action="@{/houses/{id}/reviews/{reviewId}/update(id=${house.id}, reviewId=${review.id})}" th:object="${reviewEdit}" class="w-100">
+<!--							※row: Bootstrapのグリッドシステムを使用して、水平方向に要素を配置するためのクラス-->
+
+<!--							どのデータを更新するかを指定するため、id情報もeditページに渡す(type=hiddenでビュー上には表示されない)-->
+								<input type="hidden" th:field="*{id}">
+
+<!--							■Scoreの入力-->
+								<div class="form-group row mb-3">
+									<div class="col-md-2">
+										<label for="name" class="col-form-label text-md-left fw-bold">評価</label>
+									</div>
+<!--								※Bootstrapのグリッドシステムを使用：col-md-8 は、画面サイズが中サイズ以上の場合に、この要素が8つのカラム幅を占める-->
+									<div class="col-md-8">
+										
+<!--									th:if属性の条件式に#fields.hasErrorsを使うことで、そのフィールドにエラーが発生した場合にのみその要素を表示できる-->
+<!--									th:errors属性を加え、クラスで設定したメッセージを表示できる-->
+										<div th:if="${#fields.hasErrors('score')}" class="text-danger small mb-2" th:errors="*{score}"></div>
+										
+<!--									th:field属性　各入力項目とフォームクラスのフィールドを関連付けさせる-->
+<!--										th:fieldを設定するとid属性も同じ値になる-->
+										
+										<select class="form-control form-select samuraitravel-star" name="score" autofocus>
+											<option value="" hidden class="samuraitravel-star">選択してください</option> 
+											<option class="samuraitravel-star" value="5" th:selected="*{score == 5}">★★★★★</option>
+											<option class="samuraitravel-star" value="4" th:selected="*{score == 4}">★★★★☆</option>
+											<option class="samuraitravel-star" value="3" th:selected="*{score == 3}">★★★☆☆</option>
+											<option class="samuraitravel-star" value="2" th:selected="*{score == 2}">★★☆☆☆</option>
+											<option class="samuraitravel-star" value="1" th:selected="*{score == 1}">★☆☆☆☆</option>												
+										</select>
+									</div>
+								</div>	
+									
+<!--							■Comment入力-->
+								<div class="form-group row mb-3">
+									<div class="col-md-2">
+										<label for="comment" class="col-form-label text-md-left fw-bold">コメント</label>
+									</div>
+									<div class="col-md-8">
+										<div th:if="${#fields.hasErrors('comment')}" class="text-danger small mb-2" th:errors="*{comment}"></div>
+										<textarea class="form-control" th:field="*{comment}" cols="30" rows="5"></textarea>
+									</div>
+								</div>
+								
+									
+								<div class="form-group d-flex justify-content-center my-4">
+									<button type="submit" class="btn text-white shadow-sm w-50 samuraitravel-btn">編集</button>
+								</div>
+							</form>
+							
+						</div>
+					</div>
+				</div>
+			</main>
+			
+<!--		フッター-->
+			<div th:replace="~{fragment :: footer}"></div>
+		</div>
+<!--	スクリプト-->
+		<div th:replace="~{fragment :: scripts}"></div>
+		<script th:src="@{/js/preview.js}"></script>
+			
+			
+
+	</body>
+</html>
