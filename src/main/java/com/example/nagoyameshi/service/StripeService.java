@@ -56,7 +56,7 @@ public class StripeService {
 			userRepository.save(user);
     	 
          
-//       セッション作成のためのパラメーターを構築する
+//       セッション作成のためのパラメーターを構築
          SessionCreateParams params =
              SessionCreateParams.builder()
 //             	  支払方法を設定(CARD)
@@ -72,8 +72,7 @@ public class StripeService {
                  .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                  
 //               支払成功時のリダイレクトURL
-//                   URLをクリックすると右のようなアドレスになる『http://localhost:8080/signup/verify?token=3f430f68-90f6-4e99-9f14-f773be8d0081』
-                 .setSuccessUrl("http://localhost:8080/houses/success?session_id={CHECKOUT_SESSION_ID}")
+                 .setSuccessUrl("http://localhost:8080/success?session_id={CHECKOUT_SESSION_ID}")
 //               支払いキャンセル時のリダイレクトURL
                  .setCancelUrl("http://localhost:8080/cancel")
                  

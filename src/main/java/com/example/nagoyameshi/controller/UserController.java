@@ -89,17 +89,17 @@ public class UserController {
     public String createCheckoutSession(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
     									 RedirectAttributes redirectAttributes) {
     	
-    	System.out.println("createCheckoutSession method called"); //メソッドが呼び出されているか
+    	System.out.println("createCheckoutSession method called"); //　【後で消す】メソッドが呼び出されているか
     	
     	User user = userDetailsImpl.getUser();
     	
-    	System.out.println(user);
+    	System.out.println(user);	//【後で消す】userの中身確認
     	
         try {
 //        	stripeServiceの決済セッション(createCheckoutSession())を実行のためのuser情報を渡す。
             String sessionId = stripeService.createCheckoutSession(user);
             
-            System.out.println("Generated Session ID: " + sessionId); // デバッグ用ログ
+            System.out.println("Generated Session ID: " + sessionId); // 【後で消す】デバッグ用ログ
             
             // フロントエンドにセッションIDを渡す
             redirectAttributes.addFlashAttribute("sessionId", sessionId);

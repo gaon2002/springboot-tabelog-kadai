@@ -41,9 +41,11 @@ public class ReviewService {
 				
 		House house = houseRepository.getReferenceById(id);
 		User user = userRepository.getReferenceById(userId);
+		Integer display = 0;
 				
 		review.setHouse(house);
 		review.setUser(user);
+		review.setDisplay(display);
 		review.setScore(reviewInputForm.getScore());
 		review.setComment(reviewInputForm.getComment());
         
