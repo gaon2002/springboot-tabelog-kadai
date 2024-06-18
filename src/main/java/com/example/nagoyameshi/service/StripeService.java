@@ -6,19 +6,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.nagoyameshi.entity.User;
+import com.example.nagoyameshi.repository.UserRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerUpdateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 @Service
 public class StripeService {
-	// Spring FrameworkやSpring BootなどのJavaベースのフレームワークで使用されるアノテーション
+	
+	    private final UserRepository userRepository;    
+
+	    public StripeService(UserRepository userRepository) {
+	        this.userRepository = userRepository; 
+	    }
+
+	    // Spring FrameworkやSpring BootなどのJavaベースのフレームワークで使用されるアノテーション
 		// ・Springの依存性注入機能を使用して、外部の構成ファイルや環境変数から値を注入するために使用される
 		// ・"${stripe.api-key}"：外部の構成ファイルや環境変数から取得したい値を指定するプレースホルダー
 		// ・stripe.api-key：プロパティキーで、外部の構成ファイル（例えば、application.propertiesやapplication.yml）や環境変数にこのキーに対応する値が設定されていることを期待している
@@ -28,11 +35,26 @@ public class StripeService {
 		private String stripeApiKey;
 		
      // セッションを作成し、Stripeに必要な情報を返す
-     public String createCheckoutSession(User user, HttpServletRequest httpServletRequest) throws StripeException{
+     public String createCheckoutSession(User user) throws StripeException{
 //    	 APIのシークレットキーを記述
     	 Stripe.apiKey = stripeApiKey;
 //       リクエストのURLを取得
-         String requestUrl = new String(httpServletRequest.getRequestURL());
+//         String requestUrl = new String(httpServletRequest.getRequestURL());
+    	 
+    	 // 顧客作成のパラメーターを構築
+    	 CustomerCreateParams customerParams = 
+    	     CustomerCreateParams.builder()
+	            .setName(user.getName())
+	            .setEmail(user.getEmail())
+	            .build();
+    	            
+	    // Stripe上に顧客を作成
+	    Customer customer = Customer.create(customerParams);
+
+	    // 顧客IDをユーザーテーブルにセット＆保存 (事前に顧客IDのフィールドがあることを前提)
+	    	user.setRememberToken(customer.getId());
+			userRepository.save(user);
+    	 
          
 //       セッション作成のためのパラメーターを構築する
          SessionCreateParams params =
@@ -51,15 +73,18 @@ public class StripeService {
                  
 //               支払成功時のリダイレクトURL
 //                   URLをクリックすると右のようなアドレスになる『http://localhost:8080/signup/verify?token=3f430f68-90f6-4e99-9f14-f773be8d0081』
-                 .setSuccessUrl(requestUrl.replaceAll("/houses/[0-9]+/reservations/confirm", "") + "/reservations?reserved")
+                 .setSuccessUrl("http://localhost:8080/houses/success?session_id={CHECKOUT_SESSION_ID}")
 //               支払いキャンセル時のリダイレクトURL
-                 .setCancelUrl(requestUrl.replace("/reservations/confirm", ""))
+                 .setCancelUrl("http://localhost:8080/cancel")
                  
                  .build();
          try {
 //        	 Stripe APIを呼び出してセッションを作成
              Session session = Session.create(params);
 //           成功時には作成されたセッションのIDを返す
+             
+             System.out.println("Stripe Session ID: " + session.getId()); // デバッグ用ログ
+             
              return session.getId();
              
          } catch (StripeException e) {

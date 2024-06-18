@@ -22,8 +22,7 @@ import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.StripeService;
 import com.example.nagoyameshi.service.UserService;
 import com.stripe.exception.StripeException;
-
-import jakarta.servlet.http.HttpServletRequest;
+import com.stripe.model.checkout.Session;
 
 @Controller
 @RequestMapping("/user")
@@ -34,8 +33,8 @@ public class UserController {
     
     public UserController(UserRepository userRepository, UserService userService, StripeService stripeService) {
         this.userRepository = userRepository; 
-         this.userService = userService; 
-         this.stripeService = stripeService;
+        this.userService = userService; 
+        this.stripeService = stripeService;
     }
          
 //  ユーザー情報の確認
@@ -85,41 +84,62 @@ public class UserController {
         return "redirect:/user";
     }    
     
-//  サブスク料金の支払い
+//  サブスク料金の支払いのための情報を作り、ビューに渡してStripeに情報を渡しつつ、Stripeを起動
     @PostMapping("/create-checkout-session")
-    public String createCheckoutSession(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, HttpServletRequest httpServletRequest, Model model) {
-    	User user = userRepository.getReferenceById(userDetailsImpl.getUser().getId());
+    public String createCheckoutSession(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
+    									 RedirectAttributes redirectAttributes) {
+    	
+    	System.out.println("createCheckoutSession method called"); //メソッドが呼び出されているか
+    	
+    	User user = userDetailsImpl.getUser();
+    	
+    	System.out.println(user);
     	
         try {
-//        	stripeServiceの決済セッション(createCheckoutSession())を実行
-            String sessionId = stripeService.createCheckoutSession(user, httpServletRequest);
-            // フロントエンドにセッションIDを渡す
-            model.addAttribute("sessionId", sessionId);
+//        	stripeServiceの決済セッション(createCheckoutSession())を実行のためのuser情報を渡す。
+            String sessionId = stripeService.createCheckoutSession(user);
             
-            return "redirect:/houses/index"; 
+            System.out.println("Generated Session ID: " + sessionId); // デバッグ用ログ
+            
+            // フロントエンドにセッションIDを渡す
+            redirectAttributes.addFlashAttribute("sessionId", sessionId);
+            return "redirect:/user/verify";
+
+            
             
         } catch (StripeException e) {
             // エラーハンドリング
-            model.addAttribute("error", e.getMessage());
-            return "error";
+        	redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/user/error";
         }
-        
     }
     
 //  サブスク料金支払処理が成功した後の処理
     @GetMapping("/success")
-    public String success(@RequestParam("sessionId") String sessionId, Model model) {
-        // セッションIDからユーザーを特定し、サブスクリプション情報を更新
-        // 省略
+//  セッションIDから関連するサブスクリプション情報を取得
+    public String success(@RequestParam("session_id") String sessionId, Model model) {
+    	try {
+//	    	StripeのセッションIDを使って特定のセッションを取得します。
+	    	Session session = Session.retrieve(sessionId);
+//  	  	取得したセッションから顧客IDを取得。
+	        String customerId = session.getCustomer();
+	        
+	        User user = userRepository.findByRememberToken(customerId);
+	        
+	        user.setSubscriptionStartDate(LocalDate.now());
+	        user.setSubscriptionEndDate(LocalDate.now().plusMonths(1));
+	        
+	        userRepository.save(user);
+	        
+	        return "success";
         
-        Intgeger userId = ...; // セッションIDからユーザーIDを取得
-        User user = userRepository.findById(userId).orElseThrow();
-        user.setSubscriptionStartDate(LocalDate.now());
-        user.setSubscriptionEndDate(LocalDate.now().plusMonths(1));
         
-        userRepository.save(user);
+    	}catch (StripeException e) {
+    		model.addAttribute("error", e.getMessage());
+            return "error";
+    	}
 
-        return "success";
+        
     }
 
 }

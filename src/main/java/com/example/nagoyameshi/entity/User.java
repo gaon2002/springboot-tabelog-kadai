@@ -2,6 +2,7 @@ package com.example.nagoyameshi.entity;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -67,11 +68,9 @@ public class User {
     @Column(name = "remember_token")
     private String rememberToken;
     
-    @Column(name = "subscription_start_date")
-    private Date subscriptionStartDate;
+    private LocalDate subscriptionStartDate;
     
-    @Column(name = "subscription_end_date")
-    private Date subscriptionEndDate;
+    private LocalDate subscriptionEndDate;
     
     @Column(name = "created_at", insertable = false, updatable = false)
     private Timestamp createdAt;
@@ -94,5 +93,7 @@ public class User {
         }
         return Collections.emptyList();
     }
-    
 }
+
+
+

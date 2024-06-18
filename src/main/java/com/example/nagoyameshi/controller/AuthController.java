@@ -7,8 +7,10 @@ import java.util.Collection;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,6 +31,7 @@ import com.example.nagoyameshi.service.UserService;
 import com.example.nagoyameshi.service.VerificationTokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 
 
@@ -106,8 +109,8 @@ public class AuthController {
 //  メール認証用URL（/signup/verify）を受け取りUrl内のtokenと、verificationToken内のtokenが一致するかを確認し、ユーザーを有効化する
     @GetMapping("/signup/verify")
     
-    public String verify(@RequestParam(name = "token") String token, Model model) {
-    	
+    public String verify(@RequestParam(name = "token") String token, Model model, HttpSession session) {
+    	System.out.println(token); //
 //    	URLに記載しているtokenをもとに、verificationToken内のtoken文字列を取得
         VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
         
@@ -117,11 +120,13 @@ public class AuthController {
             User user = verificationToken.getUser();  
 //          対象のユーザーを有効にするメソッドを実行
             userService.enableUser(user);
+            
 //			ユーザーの自動ログイン
-            authenticateUser(user); 
+            authenticateUser(user, session);
             
             String successMessage = "会員登録が完了しました。";
             model.addAttribute("successMessage", successMessage);            
+            
         } else {
             String errorMessage = "トークンが無効です。";
             model.addAttribute("errorMessage", errorMessage);
@@ -135,12 +140,33 @@ public class AuthController {
 
    
     
-//  メール認証後ログイン状態にしておくためのメソッド
-    private void authenticateUser(User user) {
-    	Collection<GrantedAuthority> authorities = user.getRoles();  // userからroles/authoritiesを取得
-    	UserDetails userDetails = new UserDetailsImpl(user, authorities);  // authoritiesも渡す
-    	Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    	SecurityContextHolder.getContext().setAuthentication(auth);
-        
-    }
+////  メール認証後ログイン状態にしておくためのメソッド
+//    private void authenticateUser(User user) {
+//    	Collection<GrantedAuthority> authorities = user.getRoles();  // userからroles/authoritiesを取得
+//    	
+//    	UserDetails userDetails = new UserDetailsImpl(user, authorities);  // authoritiesも渡す
+//    	System.out.println(userDetails.getUsername());	//ここまでOK(6/15)
+//    	
+//    	Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+////    	セッションスコープにログイン情報が設定される
+//    	SecurityContextHolder.getContext().setAuthentication(auth);
+//        
+//    }
+    
+	//  メール認証後ログイン状態にしておくためのメソッド
+    
+//    SecurityContextHolderにてセッションスコープへログイン情報がセットされる部分を
+//    強制的にセッションスコープへ設定するようにいたしました。
+	private void authenticateUser(User user, HttpSession session) {
+		Collection<GrantedAuthority> authorities = user.getRoles(); // userからroles/authoritiesを取得
+		UserDetails userDetails = new UserDetailsImpl(user, authorities); // authoritiesも渡す
+		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		
+		SecurityContextHolder.getContext().setAuthentication(auth);
+		// SecurityContextに認証情報をセット
+		SecurityContext context = SecurityContextHolder.getContext();
+		context.setAuthentication(auth);
+		// セッションにSecurityContextをセット
+		session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+	}
 }

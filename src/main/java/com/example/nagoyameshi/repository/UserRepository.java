@@ -13,5 +13,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 //	ユーザー検索とページネーション
 	public Page<User> findByNameLikeOrFuriganaLike(String nameKeyword, String furiganaKeyword, Pageable pageable);
+	
+//	Userテーブルに保管したStripeのCustomer IDを取得 (UserController：success()メソッドで使用
+	public User findByRememberToken(String CustomerId);
+
+	public User getReferenceByName(String name);
 
 }

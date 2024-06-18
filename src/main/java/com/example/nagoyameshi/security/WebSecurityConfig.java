@@ -59,6 +59,12 @@ public class WebSecurityConfig {
 					.logoutSuccessUrl("/?loggedOut")
 					.permitAll()
 			)
+//			.sessionManagement() // セッション管理の設定
+//            		.invalidSessionUrl("/session-timeout")
+//            		.maximumSessions(1)
+//            		.expiredUrl("/login?expired")
+//            		.and()
+//            		.sessionFixation().newSession()
 			
 			// ★CSRFトークンを返すパスはCSRF対策から除外
 			// 　・CSRF（クロス・サイト・リクエスト・フォージェリ）:サイバー攻撃の一種。この攻撃を受けると「ログイン済みユーザーになりすましたアプリやサービスの利用」「アプリやサービスのデータ漏洩（ろうえい）」といった重大な問題が発生
