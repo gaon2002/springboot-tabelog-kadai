@@ -65,8 +65,20 @@ public class ReviewService {
         // reviewテーブルの保存
 		reviewRepository.save(review);
 	}
-	
 
+//	管理者用：店舗のレビューを非表示にする
+	@Transactional
+	public void undisplay(ReviewEditForm reviewEditForm) {
+		
+		Review review = reviewRepository.getReferenceById(reviewEditForm.getId());
+		
+		review.setDisplay(reviewEditForm.getDisplay());       
+        // reviewテーブルの保存
+		reviewRepository.save(review);
+	}
+
+	
+//	ユーザーがすでにレビュー済みであればを判断するメソッド
 	public boolean hasUserAlreadyReviewed(House house, User user) {
 		// レビュー情報を取得し、特定の住宅とユーザーに関連するレビューが存在するかどうかを確認するロジックを実装
         Review reviewHouseAndUser = reviewRepository.findByHouseAndUser(house, user);
@@ -74,6 +86,8 @@ public class ReviewService {
         return reviewHouseAndUser != null; // レビューが存在する場合はtrueを返す
         
 	}
+
+
 	
 	
 }

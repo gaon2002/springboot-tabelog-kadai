@@ -10,7 +10,6 @@ package com.example.nagoyameshi.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -76,13 +75,17 @@ public class WebSecurityConfig {
 		
 		return http.build();
 	}
+
 	
-	 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-	        auth.inMemoryAuthentication()
-	                .withUser("user")
-	                .password(passwordEncoder().encode("password"))
-	                .roles("PAID");
-	    }
+
+	
+//	//ログイン保持ができたら追加する
+//	 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//	        auth.inMemoryAuthentication()
+//	                .withUser("user")
+//	                .password(passwordEncoder().encode("password"))
+//	                .roles("PAID");
+//	    }
 
 	
 	@Bean //@Beanアノテーションを付けることで、そのメソッドの戻り値をDIコンテナに格納できる

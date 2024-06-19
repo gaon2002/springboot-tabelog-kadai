@@ -1,6 +1,8 @@
 package com.example.nagoyameshi.controller;
 
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -48,7 +50,14 @@ public class ReviewController {
 	// @AuthenticationPrincipalアノテーションを使用し、認証されたユーザーの情報をUserDetailsオブジェクトとして受け取る。
 	public String review(@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable, @PathVariable(name = "id") Integer id, Model model) {
 
-		House house = houseRepository.getReferenceById(id);
+//    	Optional型を用いてエンティティの存在チェックを行う
+        Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
 		
 		Page<Review> houseReviews = reviewRepository.findAllByHouse(house, pageable);
 		
@@ -59,12 +68,60 @@ public class ReviewController {
 		
 	}
 	
+// 管理者用店舗レビュー一覧の表示（10件ずつ表示）
+// admin/reviews.html
+	@GetMapping("admin/reviews")
+	// @AuthenticationPrincipalアノテーションを使用し、認証されたユーザーの情報をUserDetailsオブジェクトとして受け取る。
+	public String review(@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable, Model model) {
+
+		Page<Review> houseReviews = reviewRepository.findAll(pageable);
+		
+		model.addAttribute("houseReviews", houseReviews);
+		
+		return "admin/reviews/index";
+		
+	}
+	
+// 管理者用店舗レビュー一覧でレビューを非表示にする
+	
+	// admin/reviews/index.html
+	// 非表示(display=1)にしたレビューを更新するメソッド：更新情報をreviewService(Repositoryを使ってデータ更新)に送信、エラーがあればビューに表示する
+	@PostMapping("/admin/reviews/{reviewId}/update")
+	public String undisplay(@PathVariable("id") Integer id,
+							@ModelAttribute @Validated ReviewEditForm reviewEditForm, 
+							BindingResult bindingResult, 
+							RedirectAttributes redirectAttributes) {
+		
+		
+		if (bindingResult.hasErrors()) {
+	        redirectAttributes.addFlashAttribute("errorMessage", "入力にエラーがあります。");
+	        return "redirect:/admin/reviews";
+	    }
+		
+		
+		reviewService.undisplay(reviewEditForm);
+		
+		redirectAttributes.addFlashAttribute("successMessage", "レビューを編集しました。");
+		
+		return "redirect:/admin/reviews";
+	}
+	
+	
 //	reviewInput.html
 //	レビューの新規投稿➀：ビューにReviewInputFormのインスタンスを渡す
 	@GetMapping("houses/{id}/reviews/reviewInput")
     public String register(@PathVariable(name = "id") Integer id, Model model) {
 		
-		House house = houseRepository.getReferenceById(id);
+//    	Optional型を用いてエンティティの存在チェックを行う
+        Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
+		
+		
 		
 		model.addAttribute("house", house);
 		model.addAttribute("reviewInputForm", new ReviewInputForm());
@@ -89,7 +146,13 @@ public class ReviewController {
 		
 		 reviewService.create(id, reviewInputForm, userDetailsImpl);
 		
-		 House house = houseRepository.getReferenceById(id);
+		 Optional<House> houseOpt = houseRepository.findById(id);
+	        if (!houseOpt.isPresent()) {
+	            // ハウスが見つからない場合のエラーハンドリングを追加する
+	            return "error/404"; // 例: 404ページにリダイレクト
+	        }
+	        
+	        House house = houseOpt.get();
 		 
 		 model.addAttribute("house", house);
 		 
@@ -106,12 +169,28 @@ public class ReviewController {
 	@GetMapping("/houses/{id}/reviews/{reviewId}/reviewEdit")
 	public String edit(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,@PathVariable(name = "id") Integer id,@PathVariable(name = "reviewId") Integer reviewId, Model model) {
 		// ReviewgetReferenceById()で情報を最新にする。
-		House house= houseRepository.getReferenceById(id);
-		Review review = reviewRepository.getReferenceById(reviewId);
+		
+		Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
+
+        
+        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+        if (!reviewOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        Review review = reviewOpt.get();
+        
 		
 		// すでに情報が登録されているため、UserEditFormをインスタンス化し、どこに何の情報を入れるかをクリアにする
 		// どこに入れるかはedit.htmlの*{}で指定(表示も入力もできるthymeleaf要素)
-		ReviewEditForm reviewEdit = new ReviewEditForm(review.getId(), review.getScore(), review.getComment());
+		ReviewEditForm reviewEdit = new ReviewEditForm(review.getId(), review.getScore(), review.getComment(), review.getDisplay());
 		
 		model.addAttribute("house", house);
 		model.addAttribute("review", review);
@@ -147,14 +226,10 @@ public class ReviewController {
 	// レビューの削除（DBからも削除する）
 	@PostMapping("/houses/{id}/reviews/{reviewId}/delete")
 	// show.htmlで削除が選択されたデータのidを引数で受け取る
-	public String delete(@PathVariable(name = "reviewId") Integer reviewId, RedirectAttributes redirectAttributes, Model model) {
+	public String delete(@PathVariable(name = "reviewId") Integer reviewId, RedirectAttributes redirectAttributes) {
 //		reviewRepositoryを使ってデータのCRUD処理を行う、deleteById(受け取った引数)メソッドで削除
 		
 		reviewRepository.deleteById(reviewId);
-		
-		Review review = reviewRepository.getReferenceById(reviewId);
-				
-		model.addAttribute("houseReview", review);
 		
 		redirectAttributes.addFlashAttribute("successMessage", "レビューを削除しました。");
 		

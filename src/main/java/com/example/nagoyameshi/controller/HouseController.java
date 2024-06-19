@@ -1,6 +1,7 @@
 package com.example.nagoyameshi.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,10 +52,6 @@ public class HouseController {
     	
         Page<House> housePage;
         
-        System.out.println("priceMin: " + priceMin);
-        System.out.println("priceMax: " + priceMax);
-        System.out.println("pageable: " + pageable);
-                
         if (keyword != null && !keyword.isEmpty()) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByNameLikeOrAddressLikeOrderByPriceMinAsc("%" + keyword + "%", "%" + keyword + "%", pageable);
@@ -109,35 +106,45 @@ public class HouseController {
         return "houses/index";
     }
     
+    
     @GetMapping("/{id}")
     public String show(@PathVariable(name = "id") Integer id,
-    				   Model model,
-    				   @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+                       Model model,
+                       @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
     	
-        House house = houseRepository.getReferenceById(id);
+//    	Optional型を用いてエンティティの存在チェックを行う
+        Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
         
         boolean hasUserAlreadyReviewed = false;
-		boolean hasUserAlreadyFavorited = false;
-		
-		if(userDetailsImpl != null) {
-			User user = userDetailsImpl.getUser();
-			hasUserAlreadyReviewed = reviewService.hasUserAlreadyReviewed(house, user);
-			hasUserAlreadyFavorited = favoriteService.hasUserAlreadyFavorited(house, user);
-		}
+        boolean hasUserAlreadyFavorited = false;
         
-// 対象の民宿のコメントを6件表示する(引数のhouseはReviewEntityで設定したhouse)
-		List<Review> newReviews = reviewRepository.findTop6ByHouseOrderByCreatedAtDesc(house);
-		long totalReviewCount = reviewRepository.countByHouse(house);
+        if (userDetailsImpl != null) {
+            User user = userDetailsImpl.getUser();
+            hasUserAlreadyReviewed = reviewService.hasUserAlreadyReviewed(house, user);
+            hasUserAlreadyFavorited = favoriteService.hasUserAlreadyFavorited(house, user);
+        }
+
+        // 対象の民宿のコメントを6件表示する(引数のhouseはReviewEntityで設定したhouse)
+        List<Review> newReviews = reviewRepository.findTop6ByHouseAndDisplayOrderByCreatedAtDesc(house, 0);
         
-//      『店舗詳細ビューに渡すデータ』
+        long totalReviewCount = reviewRepository.countByHouse(house);
+
+        // 『店舗詳細ビューに渡すデータ』
         model.addAttribute("house", house);
         model.addAttribute("reservationInputForm", new ReservationInputForm());
-		model.addAttribute("reviews", newReviews);
-		model.addAttribute("hasUserAlreadyFavorited", hasUserAlreadyFavorited);
-		model.addAttribute("hasUserAlreadyReviewed", hasUserAlreadyReviewed);
-		model.addAttribute("totalReviewCount", totalReviewCount);
-        
+        model.addAttribute("reviews", newReviews);
+        model.addAttribute("hasUserAlreadyFavorited", hasUserAlreadyFavorited);
+        model.addAttribute("hasUserAlreadyReviewed", hasUserAlreadyReviewed);
+        model.addAttribute("totalReviewCount", totalReviewCount);
+
         return "houses/show";
-    }    
+    }
+
     
 }

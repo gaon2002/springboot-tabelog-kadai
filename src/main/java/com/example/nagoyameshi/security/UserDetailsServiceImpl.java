@@ -5,6 +5,7 @@ package com.example.nagoyameshi.security;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.userRepository = userRepository;        
     }
     
+    @Cacheable("users")
     @Override
 //  UserDetailsServiceインターフェースで定義されている抽象メソッドはloadUserByUsername()のみ
 //    ※UserDetailsServiceImplクラスの役割は、UserDetailsImplクラスのインスタンスを生成すること

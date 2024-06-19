@@ -239,8 +239,10 @@
 										
 <!--									■HouseControllerで設定した<List>のreviewsが空でなければ-->
 										<div th:unless="${#lists.isEmpty(reviews)}" class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+
 <!--										■reviewはreviewsリストの中の一つ一つのレビューを参照するために使われる変数名-->
 											<div th:each="review : ${reviews}">
+											
 												<div class="col">
 													<div class="card">
 														<div class="card-body">

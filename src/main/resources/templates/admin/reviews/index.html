@@ -1,0 +1,138 @@
+<!--レビュー一覧（管理者用）-->
+
+ <!DOCTYPE html>
+ <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+     <head>
+         <div th:replace="~{fragment :: meta}"></div>   
+              
+         <div th:replace="~{fragment :: styles}"></div>
+           
+         <title>会員一覧</title>   
+     </head>
+     <body>
+         <div class="samuraitravel-wrapper">
+             <!-- ヘッダー -->
+             <div th:replace="~{fragment :: header}"></div>
+             
+             <main>
+                 <div class="container pt-4 pb-5 samuraitravel-container">
+                     <div class="row justify-content-center">
+                         <div class="col-xxl-9 col-xl-10 col-lg-11">
+                             
+                             <h1 class="mb-4 text-center">レビュー覧（管理者用）</h1>   
+                             
+                             <div class="d-flex justify-content-between align-items-end">
+                                 <form method="get" th:action="@{/admin/reviews}" class="mb-3">
+                                     <div class="input-group">
+                                         <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="氏名・フリガナ">
+                                         <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button> 
+                                     </div>               
+                                 </form>                                                                                                
+                             </div>                                                         
+                 			 <div th:if="${errorMessage}" class="alert alert-danger">
+   								 <span th:text="${errorMessage}"></span>
+							 </div>
+                             <div th:if="${successMessage}" class="alert alert-info">
+                                 <span th:text="${successMessage}"></span>
+                             </div>   
+                             
+                             <table class="table">
+                                 <thead>
+                                     <tr>
+                                         <th scope="col">店舗名</th>
+                                         <th scope="col">会員名</th>
+                                         <th scope="col">評価</th>
+                                         <th scope="col">コメント</th>
+                                         <th scope="col">表示</th>
+                                     </tr>
+                                 </thead>   
+                                 
+                                 <tbody>                                                     
+                                     <tr th:each="houseReviews : ${houseReviews}">
+										 <td>
+                                             <a th:href="@{/houses/__${houseReviews.getHouse().getId()}__}" th:text="${houseReviews.getHouse().getName()}"></a>
+                                         </td>
+                                         <td th:text="${houseReviews.getHouse().getName()}"></td>
+                                         
+                                         <td th:text="${houseReviews.getUser().getName()}"></td>
+                                         
+                                         <td>
+                                         <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseReviews.getScore()} ? '&#9733;' : '&#9734;'"></span>
+                                         </td>
+                                         
+                                         <td th:text="${houseReviews.getComment()}"></td>
+                                         
+<!--                                     ■非表示になっていたら-->
+                                         <td>
+	                                         <div th:if="${houseReviews.getDisplay()} == 1">
+	                                         	<p class="text-primary">非表示済</p>
+	                                         </div>
+                                         
+	<!--                                     ■表示になっていたら-->
+	                                         <div th:if="${houseReviews.getDisplay()} == 0">
+	<!--											■非表示にするボタン(モーダルを指定)-->
+														<a href="#" class="samuraitravel-link-danger" data-bs-toggle="modal" th:data-bs-target="${'#updateReservationModal' + houseReviews.getId()}">非表示にする</a>
+													
+			<!--									■非表示用モーダル-->
+														<div class="modal fade" th:id="${'updateReservationModal' + houseReviews.getId()}" tabindex="-1" th:aria-labelledby="${'updateReservationModalLabel' + houseReviews.getId()}">
+															<div class="modal-dialog">
+																<div class="modal-content">
+																		
+<!--															■非表示化確認-->
+																	<div class="modal-header">
+																		<h5 class="modal-title" th:id="${'updateReservationModalLabel' + houseReviews.getId()}">非表示にしてもよろしいですか？</h5>
+																			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+																	</div>
+<!--															■削除実行ボタン-->
+																	<div class="modal-footer">
+																		<form method="post" th:action="@{/admin/reviews/__${houseReviews.getId()}__/update}">
+																			<input type="hidden" th:field="*{id}" th:value="${houseReviews.getId()}"/>
+																		    <input type="hidden" th:field="*{score}" th:value="${houseReviews.getScore()}"/>
+																		    <input type="hidden" th:field="*{comment}" th:value="${houseReviews.getComment()}"/>
+																		    <input type="hidden" th:field="*{display}" th:value="1"/>
+																			<button type="submit" class="btn samuraitravel-btn-danger text-white shadow-sm" >非表示にする</button>
+																		</form>
+																	</div>
+																	
+																</div>
+															</div>
+														</div>
+														
+													</div>
+<!--	                                         	</div>-->
+                                     		</td>                                                                           
+                                     </tr>                                      
+                                 </tbody>
+                             </table>  
+                             
+                             <!-- ページネーション -->
+                             <div th:if="${houseReviews.getTotalPages() > 1}" class="d-flex justify-content-center">
+                                 <nav aria-label="会員一覧ページ">
+                                     <ul class="pagination">
+                                         <li class="page-item">
+                                             <span th:if="${houseReviews.isFirst()}" class="page-link disabled">前</span>
+                                             <a th:unless="${houseReviews.isFirst()}" th:href="@{/admin/reviews(page = ${houseReviews.getNumber() - 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">前</a>
+                                         </li>
+                                         <li th:each="i : ${#numbers.sequence(0, houseReviews.getTotalPages() - 1)}" class="page-item">
+                                             <span th:if="${i == houseReviews.getNumber()}" class="page-link active samuraitravel-active" th:text="${i + 1}"></span>
+                                             <a th:unless="${i == houseReviews.getNumber()}" th:href="@{/admin/reviews(page = ${i}, keyword = ${keyword})}" class="page-link samuraitravel-page-link" th:text="${i + 1}"></a>
+                                         </li>
+                                         <li class="page-item">                        
+                                             <span th:if="${houseReviews.isLast()}" class="page-link disabled">次</span>
+                                             <a th:unless="${houseReviews.isLast()}" th:href="@{/admin/reviews(page = ${houseReviews.getNumber() + 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">次</a>
+                                         </li>
+                                     </ul>
+                                 </nav> 
+                             </div>                                      
+                         </div>
+                     </div>
+                 </div>
+             </main>
+             
+             <!-- フッター -->
+             <div th:replace="~{fragment :: footer}"></div>
+         </div>    
+         
+         <div th:replace="~{fragment :: scripts}"></div>  
+   </body>
+ </html>

@@ -1,5 +1,7 @@
 package com.example.nagoyameshi.controller;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -61,7 +63,15 @@ public class ReservationController {
                         RedirectAttributes redirectAttributes,
                         Model model)
     {   
-        House house = houseRepository.getReferenceById(id);
+    	
+//    	Optional型を用いてエンティティの存在チェックを行う
+        Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
         Integer numberOfPeople = reservationInputForm.getNumberOfPeople();   
         Integer capacity = house.getCapacity();
         
@@ -90,7 +100,14 @@ public class ReservationController {
                           @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,                          
                           Model model) 
     {        
-        House house = houseRepository.getReferenceById(id);
+//    	Optional型を用いてエンティティの存在チェックを行う
+        Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
         User user = userDetailsImpl.getUser(); 
                 
         //予約日と予約時間を取得する
@@ -108,9 +125,29 @@ public class ReservationController {
 //    表示された予約内容に問題がなければ予約を確定させる
     
     @PostMapping("/houses/{id}/reservations/create")
-    public String create(@ModelAttribute ReservationRegisterForm reservationRegisterForm) {                
-        reservationService.create(reservationRegisterForm);        
+    public String create(@ModelAttribute ReservationRegisterForm reservationRegisterForm, RedirectAttributes redirectAttributes) {
+    	
+        reservationService.create(reservationRegisterForm);
         
-        return "redirect:/reservations?reserved";
+        redirectAttributes.addFlashAttribute("successMessage", "予約が完了しました。");
+		
+		return "redirect:/reservations?reserved";
+        
     }
+    
+    
+	// 予約の削除（DBからも削除する）
+	@PostMapping("/reservations/{id}/delete")
+	// show.htmlで削除が選択されたデータのidを引数で受け取る
+	public String delete(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes) {
+//		reservationRepositoryを使ってデータのCRUD処理を行う、deleteById(受け取った引数)メソッドで削除
+		
+		reservationRepository.deleteById(id);
+		
+		redirectAttributes.addFlashAttribute("successMessage", "予約を削除しました。");
+		
+		return "redirect:/reservations";
+	}
+	
+    
 }

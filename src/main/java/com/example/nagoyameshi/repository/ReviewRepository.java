@@ -12,7 +12,7 @@ import com.example.nagoyameshi.entity.User;
 
 public interface ReviewRepository extends JpaRepository<Review, Integer>{
 	
-	public List<Review> findTop6ByHouseOrderByCreatedAtDesc(House house);
+	public List<Review> findTop6ByHouseAndDisplayOrderByCreatedAtDesc(House house, int display);
 
 	public Page<Review> findAllByHouse(House house, Pageable pageable);
 
