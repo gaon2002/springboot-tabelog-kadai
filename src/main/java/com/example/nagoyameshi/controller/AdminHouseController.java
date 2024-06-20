@@ -1,5 +1,7 @@
 package com.example.nagoyameshi.controller;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -65,9 +67,16 @@ public class AdminHouseController {
 		return "admin/houses/index";
 	}
 	
+//	店舗詳細（管理者用）表示
 	 @GetMapping("/{id}")
      public String show(@PathVariable(name = "id") Integer id, Model model) {
-         House house = houseRepository.getReferenceById(id);
+		 Optional<House> houseOpt = houseRepository.findById(id);
+	        if (!houseOpt.isPresent()) {
+	            // ハウスが見つからない場合のエラーハンドリングを追加する
+	            return "error/404"; // 例: 404ページにリダイレクト
+	        }
+	        
+	     House house = houseOpt.get();
          
          model.addAttribute("house", house);
          
@@ -103,7 +112,14 @@ public class AdminHouseController {
 	 @GetMapping("/{id}/edit")
      public String edit(@PathVariable(name = "id") Integer id, Model model) {
 //		 該当するidの情報をhousesテーブルから取得する
-         House house = houseRepository.getReferenceById(id);
+//	    	Optional型を用いてエンティティの存在チェックを行う
+        Optional<House> houseOpt = houseRepository.findById(id);
+        if (!houseOpt.isPresent()) {
+            // ハウスが見つからない場合のエラーハンドリングを追加する
+            return "error/404"; // 例: 404ページにリダイレクト
+        }
+        
+        House house = houseOpt.get();
          
          String imageName = house.getImageName();
          

@@ -94,3 +94,22 @@ CREATE TABLE IF NOT EXISTS houses (
      FOREIGN KEY (house_id) REFERENCES houses (id),
      FOREIGN KEY (user_id) REFERENCES users (id)
  );
+ 
+     -- カテゴリー店舗テーブルを作成
+  CREATE TABLE IF NOT EXISTS houses_category (
+     id			 	INT			NOT NULL AUTO_INCREMENT PRIMARY KEY,
+     house_id	 	INT			NOT NULL,
+     category_id	INT			NOT NULL,
+     FOREIGN KEY (house_id) 	REFERENCES houses (id),
+     FOREIGN KEY (category_id) REFERENCES category (id)
+ );
+ 
+      -- カテゴリー店舗テーブルを作成
+   CREATE TABLE IF NOT EXISTS category (
+     id			 INT			NOT NULL AUTO_INCREMENT PRIMARY KEY,
+     category	 VARCHAR(255)	NOT NULL,
+     image_name	 VARCHAR(255),
+-- DEFAULT CURRENT_TIMESTAMP：時間の自動採番を設定
+	 created_at	 DATETIME		NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	 updated_at	 DATETIME		NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ );

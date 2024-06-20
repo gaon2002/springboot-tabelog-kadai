@@ -106,7 +106,7 @@ public class HouseController {
         return "houses/index";
     }
     
-    
+//  店舗詳細表示のためのデータ
     @GetMapping("/{id}")
     public String show(@PathVariable(name = "id") Integer id,
                        Model model,

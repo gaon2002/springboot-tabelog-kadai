@@ -68,11 +68,16 @@ public class ReviewService {
 
 //	管理者用：店舗のレビューを非表示にする
 	@Transactional
-	public void undisplay(ReviewEditForm reviewEditForm) {
+	public void undisplay(ReviewInputForm reviewInputForm) {
 		
-		Review review = reviewRepository.getReferenceById(reviewEditForm.getId());
+		// Debugging line
+	    System.out.println("Service received review form: " + reviewInputForm);
 		
-		review.setDisplay(reviewEditForm.getDisplay());       
+		Review review = reviewRepository.getReferenceById(reviewInputForm.getId());
+		
+		System.out.println(review);
+		
+		review.setDisplay(reviewInputForm.getDisplay());       
         // reviewテーブルの保存
 		reviewRepository.save(review);
 	}

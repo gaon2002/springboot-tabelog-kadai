@@ -28,7 +28,7 @@ public class ReviewEditForm {
 	@NotBlank(message = "店舗の評価コメントを入力してください。")
 	private String comment;
 
-	public Integer display;
+	private Integer display;
 
 
 }
