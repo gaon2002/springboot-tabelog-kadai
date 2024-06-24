@@ -1,15 +1,12 @@
 package com.example.nagoyameshi.entity;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -63,8 +60,11 @@ public class House {
      @Column(name = "updated_at", insertable = false, updatable = false)
      private Timestamp updatedAt;
      
-     @OneToMany(mappedBy = "house")
-     private Set<HousesCategory> houseCategories = new HashSet<>();
+     
+//     Houseエンティティで@OneToMany関係を定義し、そのフェッチタイプをLAZYにしている場合、セッションが閉じられた後にそのプロパティにアクセスしようとすると、LazyInitializationExceptionが発生します。この問題を解決するために、以下の方法を検討できます。
+     
+//     @OneToMany(mappedBy = "house")
+//     private Set<HousesCategory> houseCategories = new HashSet<>();
 
  
 

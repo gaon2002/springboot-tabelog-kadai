@@ -87,6 +87,23 @@
 											</div>
 										</div>
 										
+<!--									■スコア-->
+										<div class="row pb-2 mb-2 border-bottom">
+											<div class="col-4">
+												<span class="fw-bold">スコア</span>
+											</div>
+											
+											<div class="col">
+												<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore} ? '&#9733;' : '&#9734;'"></span>
+<!--												<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}">-->
+<!--												    <span th:if="${star <= houseAverageScore}">&#9733;</span>  Full star -->
+<!--												    <span th:if="${star > houseAverageScore and star - 0.5 <= houseAverageScore}">&#9733;&#9734;</span>  Half star -->
+<!--												    <span th:if="${star > houseAverageScore and star - 0.5 > houseAverageScore}">&#9734;</span>  Empty star -->
+<!--												</span>-->
+												<span class="text-danger font-weight-bold" th:text="${houseAverageScore}"></span>
+											</div>
+										</div>
+										
 <!--									■説明-->
 										<div class="row pb-2 mb-2 border-bottom">
 											<div class="col-4">

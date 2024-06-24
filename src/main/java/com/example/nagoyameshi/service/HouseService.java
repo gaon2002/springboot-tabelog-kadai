@@ -4,25 +4,33 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.nagoyameshi.dto.HouseScoreAvg;
+import com.example.nagoyameshi.dto.HouseScoreDto;
 import com.example.nagoyameshi.entity.House;
 import com.example.nagoyameshi.form.HouseEditForm;
 import com.example.nagoyameshi.form.HouseRegisterForm;
 import com.example.nagoyameshi.repository.HouseRepository;
+import com.example.nagoyameshi.repository.ReviewRepository;
 
 
 
 @Service
 public class HouseService {
-    private final HouseRepository houseRepository;    
+    private final HouseRepository houseRepository;
+    private final ReviewRepository reviewRepository;  
+
     
-    public HouseService(HouseRepository houseRepository) {
-        this.houseRepository = houseRepository;        
+    public HouseService(HouseRepository houseRepository, ReviewRepository reviewRepository) {
+        this.houseRepository = houseRepository;    
+        this.reviewRepository = reviewRepository;
     }    
     
     @Transactional
@@ -109,4 +117,34 @@ public class HouseService {
             e.printStackTrace();
         }          
     } 
+    
+//  houseRepositoryとreviewRepositoryを使用してデータを取得
+    public List<HouseScoreDto> getHousesOrderedByAverageScore() {
+        List<HouseScoreAvg> houseScores = reviewRepository.findTop5HouseAverageScoresOrderedByScore();
+
+        List<HouseScoreDto> houseDtos = new ArrayList<>();
+        
+        for (HouseScoreAvg houseScore : houseScores) {
+            House house = houseRepository.findById(houseScore.getHouseId()).orElse(null);
+            if (house != null) {
+                HouseScoreDto dto = new HouseScoreDto();
+                dto.setHouseId(house.getId());
+                dto.setName(house.getName());
+                dto.setImageName(house.getImageName());
+                dto.setDescription(house.getDescription());
+                dto.setPriceMax(house.getPriceMax());
+                dto.setPriceMin(house.getPriceMin());
+                dto.setCapacity(house.getCapacity());
+                dto.setPostalCode(house.getPostalCode());
+                dto.setAddress(house.getAddress());
+                dto.setPhoneNumber(house.getPhoneNumber());
+                dto.setAverageScore(houseScore.getAverageScore());
+
+                houseDtos.add(dto);
+            }
+        }
+
+        return houseDtos;
+    }
+    
 }

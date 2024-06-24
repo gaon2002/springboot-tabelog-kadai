@@ -49,4 +49,7 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
     
 //  お気に入り一覧に表示するコマンド
     public Page<House> findByIdIn(List<Integer> houseList, Pageable pageable);
+    
+//	レビュー一覧の店舗検索に使用（ReviewService）
+    List<House> findByNameContaining(String name);
 }

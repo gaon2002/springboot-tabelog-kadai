@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nagoyameshi.entity.House;
@@ -72,18 +73,37 @@ public class ReviewController {
 // admin/reviews.html
 	@GetMapping("admin/reviews")
 	// @AuthenticationPrincipalアノテーションを使用し、認証されたユーザーの情報をUserDetailsオブジェクトとして受け取る。
-	public String review(@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable, Model model) {
+	public String review(@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable,
+						 Model model,
+						 @RequestParam(name = "keyword", required = false) String keyword) {
 
-		Page<Review> houseReviews = reviewRepository.findAll(pageable);
+		Page<Review> houseReviews;
 		
-		model.addAttribute("houseReviews", houseReviews);
-//		編集用に空の ReviewEditFormを渡す。
+	    if (keyword != null && !keyword.isEmpty()) {
+	        // 店舗名で検索
+	        houseReviews = reviewService.findReviewsByHouseName(keyword, pageable);
+	        
+	        System.out.println("houseReviews：" + houseReviews);  // Page 1 of 0 containing UNKNOWN instances
+	        
+	        if (houseReviews.isEmpty()) {
+	            // 該当する店舗が無い場合、ユーザーアドレスで検索
+	            houseReviews = reviewService.findReviewsByUserEmail(keyword, pageable);
+	        }
+	    } else {
+	        // キーワードが無い場合、全レビューを取得
+	        houseReviews = reviewRepository.findAll(pageable);
+	    }
+        
+	    System.out.println("houseReview:" + houseReviews.getTotalPages());
+	    
+	    model.addAttribute("houseReviews", houseReviews);
+	    model.addAttribute("keyword", keyword);
+//    	編集用に空の ReviewEditFormを渡す。
 		model.addAttribute("reviewInputForm", new ReviewInputForm());
-		
-		return "admin/reviews/index";
-		
-	}
-	
+                
+            return "admin/reviews/index";
+ }
+		 
 	
 	// admin/reviews/index.html
 	// 非表示(display=1)にしたレビューを更新するメソッド：更新情報をreviewService(Repositoryを使ってデータ更新)に送信、エラーがあればビューに表示する
@@ -110,21 +130,9 @@ public class ReviewController {
 		
 		reviewService.undisplay(reviewInputForm);
 		
-		
-		
 		redirectAttributes.addFlashAttribute("successMessage", "レビューを編集しました。");
 		
 		return "redirect:/admin/reviews";
-	}
-	
-//	■テスト
-	@PostMapping("/admin/reviews/someId/update")
-	public String testUndisplay(@ModelAttribute("reviewInputForm") ReviewInputForm reviewInputForm) {
-	    // Debugging line to check form values
-	    System.out.println("Test Received review form: " + reviewInputForm);
-
-	    // Return to some view or redirect
-	    return "someView";
 	}
 	
 	

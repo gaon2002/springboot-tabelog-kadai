@@ -114,6 +114,8 @@
 	                                     <select class="form-select form-select-sm" name="order" onChange="this.form.submit();">
 	                                         <option value="createdAtDesc" th:selected="${order == 'createdAtDesc' || order == null}">新着順</option>                                            
 	                                         <option value="priceMinAsc" th:selected="${order == 'priceMinAsc'}">最小料金が安い順</option>
+	                                         
+<!--	                                         <option value="reviewScoreDsc" th:selected="${order == 'reviewScoreDsc'}">人気の高い順</option>-->
 	                                     </select>   
                                  </form>    
                                                        
@@ -130,7 +132,10 @@
                                              </div> 
                                              <div class="col-md-8">                                                                                                                        
                                                  <div class="card-body">                                    
-                                                     <h3 class="card-title mb-3" th:text="${house.getName()}"></h3>                                            
+                                                     <h3 class="card-title mb-3" th:text="${house.getName()}"></h3> 
+                                                     
+                                                     <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore[house.id]} ? '&#9733;' : '&#9734;'"></span>
+                                                     <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[house.id] != null ? houseAverageScore[house.id] : 'No reviews'}"></span>
   
                                                      <hr class="mb-3">
                                                      

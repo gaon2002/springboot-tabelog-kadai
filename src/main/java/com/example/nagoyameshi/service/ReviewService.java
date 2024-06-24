@@ -1,5 +1,10 @@
 package com.example.nagoyameshi.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +71,50 @@ public class ReviewService {
 		reviewRepository.save(review);
 	}
 
+	// 店舗のキーワード検索を実現する
+	public Page<Review> findReviewsByHouseName(String name, Pageable pageable) {
+		
+	    List<House> houses = houseRepository.findByNameContaining(name);
+	    System.out.println("Found Houses: " + houses);  //ここまではコレクションできている
+	    
+	    if (houses.isEmpty()) {
+	        return Page.empty();
+	    }
+	    
+	    List<Integer> houseIds = houses.stream().map(House::getId).collect(Collectors.toList());
+	    
+	    System.out.println("Found HouseIds: " + houseIds);  //ここまではコレクションできている
+	    
+	    Page<Review> page = reviewRepository.findByHouseIdIn(houseIds, pageable);
+	    
+	    System.out.println(page.getTotalPages());
+	    
+	    return page;
+	    		
+//	    		reviewRepository.findByHouseIdIn(houseIds, pageable);
+	}
+
+	
+	// ユーザーのキーワード検索を実現する
+	public Page<Review> findReviewsByUserEmail(String email, Pageable pageable) {
+	    List<User> users = userRepository.findByEmailContaining(email);
+	    System.out.println("Found Users: " + users);
+	    
+	    if (users.isEmpty()) {
+	        return Page.empty();
+	    }
+	    
+//	    Service層では複数のHouseやUserに対応するレビューを取得できるようになり、
+//	    Controllerにて適切に判断されてビューに渡されるようになる。
+	    
+//	    ・users.stream(): usersリストをストリームに変換します。
+//	    ・map(User::getId): 各UserオブジェクトからそのIDを抽出します。User::getIdはUserクラスのgetIdメソッド参照です。
+//	    ・collect(Collectors.toList()): 抽出されたIDをリストに収集。
+	    
+	    List<Integer> userIds = users.stream().map(User::getId).collect(Collectors.toList());
+	    return reviewRepository.findByUserIdIn(userIds, pageable);
+	}
+
 //	管理者用：店舗のレビューを非表示にする
 	@Transactional
 	public void undisplay(ReviewInputForm reviewInputForm) {
@@ -92,7 +141,11 @@ public class ReviewService {
         
 	}
 
+//	店舗のスコア平均を計算して出力する
+	public Double getHouseAverageScore(Integer houseId) {
+		
+        return reviewRepository.findAverageScoreByHouseId(houseId);
+    }
 
-	
-	
+
 }

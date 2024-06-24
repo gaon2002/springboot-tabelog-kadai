@@ -29,7 +29,9 @@
 						<span th:text="${successMessage}"></span>
 					</div>
 					
-<!--				■新着店舗情報を表示-->
+<!--				■店舗情報を表示-->
+
+<!--				■検索ボックス-->
 					<div class="d-flex justify-content-center">
 						<form method="get" th:action="@{/houses}" class="mb-5 samuraitravel-search-form">
 							<div class="input-group">
@@ -42,30 +44,64 @@
 					 <h2 class="text-center mb-3">カテゴリから探す</h2>     
                               
                      <h2 class="text-center mb-3">人気順で探す</h2>     
+                     <div class="row row-cols-lg-5 row-cols-2 g-3 mb-5">
+							<div class="col" th:each="houseScore : ${houseScore}">
+								<a th:href="@{/houses/__${houseScore.houseId}__}" class="link-dark samuraitravel-card-link">
+									<div class="card h-100">
+	<!--								店舗画像-->
+										<img th:if="${houseScore.imageName}" th:src="@{/storage/__${houseScore.imageName}__}" class="card-img-top samuraitravel-vertical-card-image" alt="店舗画像">
+										<img th:unless="${houseScore.imageName}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-vertical-card-image" alt="NO IMAGE">
+	
+										<div class="card-body">
+	<!--									店舗名-->
+											<h3 class="card-title" th:text="${houseScore.name}"></h3>
+	<!--									スコア-->
+											<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore[houseScore.houseId]} ? '&#9733;' : '&#9734;'"></span>
+	                                        <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[houseScore.houseId] != null ? houseAverageScore[houseScore.houseId] : 'No reviews'}"></span>
+											
+											<p class="card-text mb-1">
+	<!--										・"text-muted"：テキストを灰色にする-->
+												<small class="text-muted" th:text="${houseScore.address}"></small>
+											</p>
+											<p class="card-text">
+	<!--										・#numbers.formatInteger()：数値を指定された形式でフォーマットするメソッド-->
+												<span th:text="${#numbers.formatInteger(houseScore.priceMin, 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(houseScore.priceMax, 1, 'COMMA') + '円'}"></span>
+											</p>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>
 					
 					<h2 class="text-center mb-3">新着順</h2>
-					<div class="row row-cols-lg-5 row-cols-2 g-3 mb-5">
-						<div class="col" th:each="newHouse : ${newHouses}">
-							<a th:href="@{/houses/__${newHouse.getId()}__}" class="link-dark samuraitravel-card-link">
-								<div class="card h-100">
-<!--								店舗画像-->
-									<img th:if="${newHouse.getImageName()}" th:src="@{/storage/__${newHouse.getImageName()}__}" class="card-img-top samuraitravel-vertical-card-image" alt="店舗画像">
-									<img th:unless="${newHouse.getImageName()}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-vertical-card-image" alt="NO IMAGE">
-									<div class="card-body">
-										<h3 class="card-title" th:text="${newHouse.getName()}"></h3>
-										<p class="card-text mb-1">
-<!--										・"text-muted"：テキストを灰色にする-->
-											<small class="text-muted" th:text="${newHouse.getAddress()}"></small>
-										</p>
-										<p class="card-text">
-<!--										・#numbers.formatInteger()：数値を指定された形式でフォーマットするメソッド-->
-											<span th:text="${#numbers.formatInteger(newHouse.getPriceMin(), 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(newHouse.getPriceMax(), 1, 'COMMA') + '円'}"></span>
-										</p>
+						<div class="row row-cols-lg-5 row-cols-2 g-3 mb-5">
+							<div class="col" th:each="newHouse : ${newHouses}">
+								<a th:href="@{/houses/__${newHouse.getId()}__}" class="link-dark samuraitravel-card-link">
+									<div class="card h-100">
+	<!--								店舗画像-->
+										<img th:if="${newHouse.getImageName()}" th:src="@{/storage/__${newHouse.getImageName()}__}" class="card-img-top samuraitravel-vertical-card-image" alt="店舗画像">
+										<img th:unless="${newHouse.getImageName()}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-vertical-card-image" alt="NO IMAGE">
+	
+										<div class="card-body">
+	<!--									店舗名-->
+											<h3 class="card-title" th:text="${newHouse.getName()}"></h3>
+	<!--									スコア-->
+											<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore[newHouse.id]} ? '&#9733;' : '&#9734;'"></span>
+	                                        <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[newHouse.id] != null ? houseAverageScore[newHouse.id] : 'No reviews'}"></span>
+											
+											<p class="card-text mb-1">
+	<!--										・"text-muted"：テキストを灰色にする-->
+												<small class="text-muted" th:text="${newHouse.getAddress()}"></small>
+											</p>
+											<p class="card-text">
+	<!--										・#numbers.formatInteger()：数値を指定された形式でフォーマットするメソッド-->
+												<span th:text="${#numbers.formatInteger(newHouse.getPriceMin(), 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(newHouse.getPriceMax(), 1, 'COMMA') + '円'}"></span>
+											</p>
+										</div>
 									</div>
-								</div>
-							</a>
+								</a>
+							</div>
 						</div>
-					</div>
 					
 <!--				■店舗検索-->
                      <div class="row justify-content-center">

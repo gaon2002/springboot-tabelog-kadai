@@ -104,7 +104,9 @@ CREATE TABLE IF NOT EXISTS houses (
      FOREIGN KEY (category_id) REFERENCES category (id)
  );
  
-      -- カテゴリー店舗テーブルを作成
+
+ 
+      -- カテゴリーテーブルを作成
    CREATE TABLE IF NOT EXISTS category (
      id			 INT			NOT NULL AUTO_INCREMENT PRIMARY KEY,
      category	 VARCHAR(255)	NOT NULL,
@@ -113,3 +115,11 @@ CREATE TABLE IF NOT EXISTS houses (
 	 created_at	 DATETIME		NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	 updated_at	 DATETIME		NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
  );
+ 
+ -- 外部キー制約の削除
+ALTER TABLE houses_category DROP FOREIGN KEY houses_category_ibfk_2;
+
+-- 外部キー制約の追加（カスケード削除付き）
+ALTER TABLE houses_category
+ADD CONSTRAINT houses_category_ibfk_2
+FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE;

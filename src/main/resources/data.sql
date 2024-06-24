@@ -248,25 +248,26 @@ INSERT IGNORE INTO favorites (id, house_id, user_id) VALUES(19,9,5);
 INSERT IGNORE INTO favorites (id, house_id, user_id) VALUES(20,10,5);
 
 -- categoryテーブル
-INSERT IGNORE INTO category (id,category,image_name) VALUES (1,'居酒屋','izakaya_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (2,'イタリアン','Itarian_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (3,'うなぎ','unagi_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (4,'割烹','kappou_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (5,'カフェ','cafe_02.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (6,'串カツ','kushikatsu_01.jpeg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (1,'居酒屋','izakaya_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (2,'イタリアン','Itarian_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (3,'うなぎ','unagi_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (4,'割烹','kappou_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (5,'カフェ','cafe_02.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (6,'串カツ','kushikatsu_01.jpg');
 INSERT IGNORE INTO category (id,category,image_name) VALUES (7,'串焼き','kushiyaki_01');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (8,'魚料理','gyokai_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (9,'寿司','sushi_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (10,'中華料理','huka_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (11,'鉄板料理','meat_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (12,'天ぷら','tempra_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (13,'肉料理','meat_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (14,'やきとり','kushiyaki_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (15,'焼肉','meat_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (16,'洋食','yoshoku_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (17,'炉端焼き','robata_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (18,'ワイン','wine_01.jpeg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (19,'和食','washoku_01.jpeg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (8,'魚料理','gyokai_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (9,'寿司','sushi_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (10,'中華料理','chuka_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (11,'鉄板料理','meat_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (12,'天ぷら','tempra_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (13,'肉料理','meat_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (14,'やきとり','kushiyaki_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (15,'焼肉','meat_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (16,'洋食','yoshoku_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (17,'炉端焼き','robata_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (18,'ワイン','wine_01.jpg');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (19,'和食','washoku_01.jpg');
+
 
 -- houses_categoryテーブル
 INSERT IGNORE INTO houses_category (id,house_id,category_id) VALUES (1,1,1);

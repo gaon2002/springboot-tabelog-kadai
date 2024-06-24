@@ -1,6 +1,8 @@
 package com.example.nagoyameshi.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -54,8 +56,10 @@ public class HouseController {
         
         if (keyword != null && !keyword.isEmpty()) {
         	if (order != null && order.equals("priceMinAsc")) {
+//        		並べ替え：最小利用金額の小さい順
                 housePage = houseRepository.findByNameLikeOrAddressLikeOrderByPriceMinAsc("%" + keyword + "%", "%" + keyword + "%", pageable);
             } else {
+//        		並べ替え：新着順
                 housePage = houseRepository.findByNameLikeOrAddressLikeOrderByCreatedAtDesc("%" + keyword + "%", "%" + keyword + "%", pageable);
             }   
         } else if (area != null && !area.isEmpty()) {
@@ -86,15 +90,35 @@ public class HouseController {
                 housePage = houseRepository.findByPriceMaxLessThanEqualOrderByPriceMinAsc(priceMax, pageable);
             } else {
                 housePage = houseRepository.findByPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMax, pageable);
-            }   
+            }  
         	
         } else {
-        	if (order != null && order.equals("priceAsc")) {
+        	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findAllByOrderByPriceMinAsc(pageable);
             } else {
                 housePage = houseRepository.findAllByOrderByCreatedAtDesc(pageable);   
             }        
-        }                
+        }       
+        	
+   	
+////      人気順
+//        } else if (order != null && order.equals("priceMinAsc") {
+//            List<HouseScoreDto> houseScore = houseService.getHousesOrderedByAverageScore();
+//        	
+//        }                
+//            model.addAttribute("houseScore", houseScore);
+        
+        
+
+        
+//    	店舗のスコア平均を計算して出力する
+        Map<Integer, Double> houseAverageScore = new HashMap<>();
+        
+        for (House house : housePage) {
+            Double averageScore = reviewService.getHouseAverageScore(house.getId());
+            houseAverageScore.put(house.getId(), averageScore);
+        }
+       
         
         model.addAttribute("housePage", housePage);
         model.addAttribute("keyword", keyword);
@@ -102,10 +126,14 @@ public class HouseController {
         model.addAttribute("priceMax", priceMax);         
         model.addAttribute("priceMin", priceMin); 
         model.addAttribute("order", order);
+        model.addAttribute("houseAverageScore", houseAverageScore);
         
+        
+ 
         return "houses/index";
     }
-    
+
+       
 //  店舗詳細表示のためのデータ
     @GetMapping("/{id}")
     public String show(@PathVariable(name = "id") Integer id,
@@ -134,6 +162,10 @@ public class HouseController {
         List<Review> newReviews = reviewRepository.findTop6ByHouseAndDisplayOrderByCreatedAtDesc(house, 0);
         
         long totalReviewCount = reviewRepository.countByHouse(house);
+        
+
+//    	店舗のスコア平均を計算して出力する
+    	Double houseAverageScore = reviewService.getHouseAverageScore(id);
 
         // 『店舗詳細ビューに渡すデータ』
         model.addAttribute("house", house);
@@ -142,6 +174,7 @@ public class HouseController {
         model.addAttribute("hasUserAlreadyFavorited", hasUserAlreadyFavorited);
         model.addAttribute("hasUserAlreadyReviewed", hasUserAlreadyReviewed);
         model.addAttribute("totalReviewCount", totalReviewCount);
+        model.addAttribute("houseAverageScore", houseAverageScore);
 
         return "houses/show";
     }
