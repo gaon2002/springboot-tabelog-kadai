@@ -131,9 +131,6 @@ public class CategoryController {
          return "redirect:/admin/categories";
      }    
 	 
-	 
-	 
-	 
 	
 //	＜カテゴリー削除＞
 	@PostMapping("/{id}/delete")

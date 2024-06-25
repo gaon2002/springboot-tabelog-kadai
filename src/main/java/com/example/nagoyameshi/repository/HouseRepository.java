@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.example.nagoyameshi.entity.House;
 
@@ -51,5 +53,53 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
     public Page<House> findByIdIn(List<Integer> houseList, Pageable pageable);
     
 //	レビュー一覧の店舗検索に使用（ReviewService）
-    List<House> findByNameContaining(String name);
+    public List<House> findByNameContaining(String name);
+    
+//  人気の高い順に並べ替えする際のキーワード検索
+//    HouseRepositoryでスコアの並べ替えを考える必要はない。ReviewRepositoryから取得した結果を使うだけ。
+//    	・SELECT h FROM House：Houseエンティティからhというエイリアス（別名）を使ってデータを選択。（= Houseテーブルからデータを取得する）
+//    	・h WHERE：条件文　（以下の時にマッチする）
+//    		-h.name LIKE :name：h.name（名前）が指定されたnameパラメータに一致するか
+//    		-OR：もしくは
+//    		-h.address LIKE :h.address（住所）が指定されたaddressパラメータに一致する場合
+//    	・AND：さらに条件追加
+//    		-h.id：h.idが指定されたidsパラメータに含まれる場合にマッチ
+//    		-IN :ids：複数のIDを含むコレクション（例えばリストやセット）の中からマッチするh.idを取得
+    @Query("SELECT h FROM House h WHERE (h.name LIKE :name OR h.address LIKE :address) AND h.id IN :ids")
+    public Page<House> findByNameLikeOrAddressLikeAndIdIn(
+        @Param("name") String name, 
+        @Param("address") String address, 
+        @Param("ids") List<Integer> ids,
+        Pageable pageable);
+    
+//  リストを文字列化して渡すことでクエリに埋め込む。
+//	・SELECT h FROM House：Houseエンティティからhというエイリアス（別名）を使ってデータを選択。（= Houseテーブルからデータを取得する）
+//	・h WHERE：条件文　（以下の時にマッチする）
+//		-h.id：h.idが指定されたidsパラメータに含まれる場合にマッチ
+//		-IN :ids：複数のIDを含むコレクション（例えばリストやセット）の中からマッチするh.idを取得
+    @Query("SELECT h FROM House h WHERE h.id IN :ids")
+    public Page<House> findAllByIdsIn(
+        @Param("ids") List<Integer> ids,
+        Pageable pageable);
+    
+    
+    @Query("SELECT h FROM House h WHERE (h.priceMin >= :priceMin AND h.priceMax <= :priceMax) AND h.id IN :ids")
+    public Page<House> findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqual(
+        @Param("priceMax") Integer priceMax, 
+        @Param("priceMin") Integer priceMin, 
+        @Param("ids") List<Integer> ids,
+        Pageable pageable);
+    
+    @Query("SELECT h FROM House h WHERE (h.priceMin >= :priceMin) AND h.id IN :ids")
+    public Page<House> findByPriceMinGreaterThanEqual(
+        @Param("priceMin") Integer priceMin, 
+        @Param("ids") List<Integer> ids,
+        Pageable pageable);
+    
+    @Query("SELECT h FROM House h WHERE (h.priceMax <= :priceMax) AND h.id IN :ids")
+    public Page<House> findByPriceMaxLessThanEqual(
+        @Param("priceMax") Integer priceMax, 
+        @Param("ids") List<Integer> ids,
+        Pageable pageable);
+
 }

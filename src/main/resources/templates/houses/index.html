@@ -41,6 +41,7 @@
                                          <div class="form-group mb-3">
                                              <select class="form-control form-select" name="area">  
                                                  <option value="" hidden>選択してください</option>   
+                                                 <option value="" th:selected="${area == null}">指定なし</option>
 <!--                                                 th:selected属性：値に指定された条件式がtrueの場合にのみ選択状態になる機能。-->
 <!--                                                 areaパラメータの値によって選択状態を動的に変更したい場合に便利-->
                                                      <option value="中区" th:selected="${area == '中区'}">中区</option>                                                
@@ -115,7 +116,7 @@
 	                                         <option value="createdAtDesc" th:selected="${order == 'createdAtDesc' || order == null}">新着順</option>                                            
 	                                         <option value="priceMinAsc" th:selected="${order == 'priceMinAsc'}">最小料金が安い順</option>
 	                                         
-<!--	                                         <option value="reviewScoreDsc" th:selected="${order == 'reviewScoreDsc'}">人気の高い順</option>-->
+	                                         <option value="scoreDesc" th:selected="${order == 'scoreDesc'}">人気の高い順</option>
 	                                     </select>   
                                  </form>    
                                                        
@@ -132,10 +133,12 @@
                                              </div> 
                                              <div class="col-md-8">                                                                                                                        
                                                  <div class="card-body">                                    
-                                                     <h3 class="card-title mb-3" th:text="${house.getName()}"></h3> 
+                                                     <h3 class="card-title mb-3" th:text="${house.getName()}"></h3>
                                                      
-                                                     <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore[house.id]} ? '&#9733;' : '&#9734;'"></span>
-                                                     <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[house.id] != null ? houseAverageScore[house.id] : 'No reviews'}"></span>
+                                                     <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}">
+														 <span th:utext="${star <= houseAverageScore[house.id] ? '&#9733;' : '&#9734;'}"></span>
+													  </span>
+													  <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[house.id] != null ? houseAverageScore[house.id] : 'No reviews'}"></span>
   
                                                      <hr class="mb-3">
                                                      

@@ -5,9 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,9 +123,10 @@ public class HouseService {
         }          
     } 
     
-//  houseRepositoryとreviewRepositoryを使用してデータを取得
+//  houseRepositoryとreviewRepositoryを使用してデータを取得（TOPページに表示）
     public List<HouseScoreDto> getHousesOrderedByAverageScore() {
-        List<HouseScoreAvg> houseScores = reviewRepository.findTop5HouseAverageScoresOrderedByScore();
+//    	レビューリポジトリからスコアTop5の店舗を取得
+        List<HouseScoreAvg> houseScores = reviewRepository.findHouseAverageScoresOrderedByScore();
 
         List<HouseScoreDto> houseDtos = new ArrayList<>();
         
@@ -146,5 +152,143 @@ public class HouseService {
 
         return houseDtos;
     }
+   
+
+//  houseIdごとにscoreの平均を計算し、HouseScoreAvgに格納
+    public Double getHouseAverageScore(Integer houseId) {
+        return reviewRepository.findAverageScoreByHouseId(houseId);
+    }
+
+//  Reviewリポジトリの実装（house.idでグループ化し、scoreの平均を算出して、高い順に並べ替え）
+    public List<HouseScoreAvg> getHousesOrderedByAverageScoreSorted() {
+        return reviewRepository.findHouseAverageScoresSortedOrderedByScore();
+    }
+
+//  キーワード検索後に並べ替えするメソッド
+    public Page<House> getHouseAverageScoreSorted(String keyword, String address, Pageable pageable) {
+    	// 1. Houseエンティティのリストを平均スコアでソート(ReviewRepositoryのメソッド呼び出し)して取得
+        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+//      ・houseScoresリストからHouseのIDのみを抽出し、新しいリストidsに格納
+//        -houseScores.stream()：houseScoresリストをストリームに変換。
+//        	※ストリームは、データのシーケンス（順序のある一連の要素）を処理するための抽象化であり、様々な操作（フィルタリング、マッピング、ソートなど）をサポート。
+        List<Integer> ids = houseScores.stream()
+//        		・ストリームの各要素（HouseScoreAvgオブジェクト）に対してgetHouseIdメソッドを適用し、新しいストリームを生成。
+//        		 -mapメソッド：元のストリームの各要素に対して関数を適用し、その結果を新しいストリームとして返す。
+//        		  この新しいストリームは、元のHouseScoreAvgオブジェクトの代わりにhouseId（Integer型のID）を含む。
+//        		  (HouseScoreAvg::getHouseId)：HouseScoreAvgクラスのインスタンスメソッドgetHouseIdを参照
+                .map(HouseScoreAvg::getHouseId)
+//              ・map()で作成された新しいストリームの要素をListに変換し、リストに収集する。
+//                ※collectメソッド：ストリームの終端操作で、ストリームの要素を指定されたコレクタ（この場合はリスト）に収集される
+                .collect(Collectors.toList());
+
+        // 2. IDリストが空の場合、空のページを返す
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+     // 3. キーワードと住所に基づいてフィルタリングし、ページングされた結果を取得
+        Page<House> result = houseRepository.findByNameLikeOrAddressLikeAndIdIn(
+                "%" + keyword + "%", "%" + keyword + "%", ids, pageable);
+
+     // 4. 結果をJavaコードで並び替える
+        List<House> sortedHouses = result.stream()
+//        								・ストリームの要素（Houseオブジェクト）を、カスタムの比較ロジックに基づいて並び替え
+//        								  -Comparator.comparingInt(h -> ids.indexOf(h.getId()))：各Houseオブジェクトのidが、idsリストのどの位置にあるかを基準に並び替えるためのコンパレータを生成
+//        									※h：Houseオブジェクトを表す、h.getId()はそのHouseオブジェクトのIDを取得
+//        									※ids.indexOf(h.getId())：そのIDがidsリストのどの位置にあるかを返す
+                                         .sorted(Comparator.comparingInt(h -> ids.indexOf(h.getId())))
+//                                       -並び替えたストリームの要素をリストに収集。
+                                         .collect(Collectors.toList());
+
+     // 5. 並び替えた結果を新しいPageImplオブジェクトとして返す
+        return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
+    }
+    
+//  全てを表示後に並べ替えするメソッド
+    public Page<House> getHouseAverageScoreSortedAll(Pageable pageable) {
+        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+        List<Integer> ids = houseScores.stream()
+                .map(HouseScoreAvg::getHouseId)
+                .collect(Collectors.toList());
+
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Page<House> result = houseRepository.findAllByIdsIn(ids, pageable);
+
+        // 並び替えをJava codeで行う
+        List<House> sortedHouses = result.stream()
+                                         .sorted(Comparator.comparingInt(h -> ids.indexOf(h.getId())))
+                                         .collect(Collectors.toList());
+
+        return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
+    }
+    
+//  利用金額(上限下限両方入る場合)から検索表示後に並べ替えするメソッド
+    public Page<House> getHouseAverageScoreSortedGreaterAndLess(Integer priceMax, Integer priceMin, Pageable pageable) {
+        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+        List<Integer> ids = houseScores.stream()
+                .map(HouseScoreAvg::getHouseId)
+                .collect(Collectors.toList());
+
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Page<House> result = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqual(priceMax, priceMin, ids, pageable);
+
+        // 並び替えをJava codeで行う
+        List<House> sortedHouses = result.stream()
+                                         .sorted(Comparator.comparingInt(h -> ids.indexOf(h.getId())))
+                                         .collect(Collectors.toList());
+
+        return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
+    }
+
+//  利用金額(下限が入る場合)から検索表示後に並べ替えするメソッド
+    public Page<House> getHouseAverageScoreSortedGreater(Integer priceMin, Pageable pageable) {
+        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+        List<Integer> ids = houseScores.stream()
+                .map(HouseScoreAvg::getHouseId)
+                .collect(Collectors.toList());
+
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Page<House> result = houseRepository.findByPriceMinGreaterThanEqual(priceMin, ids, pageable);
+
+        // 並び替えをJava codeで行う
+        List<House> sortedHouses = result.stream()
+                                         .sorted(Comparator.comparingInt(h -> ids.indexOf(h.getId())))
+                                         .collect(Collectors.toList());
+
+        return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
+    }
+    
+//  利用金額(上限両方入る場合)から検索表示後に並べ替えするメソッド
+    public Page<House> getHouseAverageScoreSortedLess(Integer priceMax, Pageable pageable) {
+        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+        List<Integer> ids = houseScores.stream()
+                .map(HouseScoreAvg::getHouseId)
+                .collect(Collectors.toList());
+
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Page<House> result = houseRepository.findByPriceMaxLessThanEqual(priceMax, ids, pageable);
+
+        // 並び替えをJava codeで行う
+        List<House> sortedHouses = result.stream()
+                                         .sorted(Comparator.comparingInt(h -> ids.indexOf(h.getId())))
+                                         .collect(Collectors.toList());
+
+        return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
+    }
+
+
+    
     
 }

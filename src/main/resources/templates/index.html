@@ -41,9 +41,30 @@
 						</form>
 					</div>
 					
-					 <h2 class="text-center mb-3">カテゴリから探す</h2>     
+ <!--				■カテゴリー検索-->
+                    
+                             <h2 class="text-center mb-3">カテゴリから探す</h2>                                        
                               
-                     <h2 class="text-center mb-3">人気順で探す</h2>     
+                             <table class="table">
+                                 <tbody>                                                     
+                                  
+                                     <tr>
+                                         <td>
+                                             <a th:href="@{/houses?area=中区}" class="btn btn-outline-dark me-2">中区</a>
+                                             <a th:href="@{/houses?area=中村区}" class="btn btn-outline-dark me-2">中村区</a>
+                                             <a th:href="@{/houses?area=昭和区}" class="btn btn-outline-dark me-2">昭和区</a>
+                                             <a th:href="@{/houses?area=瑞穂区}" class="btn btn-outline-dark me-2">瑞穂区</a>
+                                             <a th:href="@{/houses?area=熱田区}" class="btn btn-outline-dark me-2">熱田区</a>
+                                             <a th:href="@{/houses?area=中川区}" class="btn btn-outline-dark me-2">中川区</a>
+                                         </td>                                     
+                                     </tr>  
+                                                                                                                                                                                                                                                                                                                                                                                                            
+                                 </tbody>
+                             </table>  
+					 
+					 
+                              
+                     <h2 class="text-center mb-3">人気順</h2>     
                      <div class="row row-cols-lg-5 row-cols-2 g-3 mb-5">
 							<div class="col" th:each="houseScore : ${houseScore}">
 								<a th:href="@{/houses/__${houseScore.houseId}__}" class="link-dark samuraitravel-card-link">
@@ -56,24 +77,16 @@
 	<!--									店舗名-->
 											<h3 class="card-title" th:text="${houseScore.name}"></h3>
 	<!--									スコア-->
-											<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore[houseScore.houseId]} ? '&#9733;' : '&#9734;'"></span>
-	                                        <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[houseScore.houseId] != null ? houseAverageScore[houseScore.houseId] : 'No reviews'}"></span>
+											<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseScore.averageScore} ? '&#9733;' : '&#9734;'"></span>
+	                                        <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseScore.averageScore != null ? houseScore.averageScore : 'No reviews'}"></span>
 											
-											<p class="card-text mb-1">
-	<!--										・"text-muted"：テキストを灰色にする-->
-												<small class="text-muted" th:text="${houseScore.address}"></small>
-											</p>
-											<p class="card-text">
-	<!--										・#numbers.formatInteger()：数値を指定された形式でフォーマットするメソッド-->
-												<span th:text="${#numbers.formatInteger(houseScore.priceMin, 1, 'COMMA') + ' ～ ' + #numbers.formatInteger(houseScore.priceMax, 1, 'COMMA') + '円'}"></span>
-											</p>
 										</div>
 									</div>
 								</a>
 							</div>
 						</div>
 					
-					<h2 class="text-center mb-3">新着順</h2>
+					<h2 class="text-center mb-3">新着</h2>
 						<div class="row row-cols-lg-5 row-cols-2 g-3 mb-5">
 							<div class="col" th:each="newHouse : ${newHouses}">
 								<a th:href="@{/houses/__${newHouse.getId()}__}" class="link-dark samuraitravel-card-link">

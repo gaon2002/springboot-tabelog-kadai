@@ -8,6 +8,11 @@ import com.example.nagoyameshi.entity.Category;
 
 public interface CategoryReository extends JpaRepository<Category, Integer> {
 
-	Page<Category> findByCategoryLike(String categoryKeyword, Pageable pageable);
+
+	public Page<Category> findByCategoryLike(String categoryKeyword, Pageable pageable);   
+	public Page<Category> findAll(Pageable pageable);  
+	
+//    public Page<Category> findByCategoryLikeOrderByCreatedAtDesc(String categoryKeyword, Pageable pageable);  
+//    public Page<Category> findByCategoryLikeOrderByPriceMinAsc(String categoryKeyword, Pageable pageable);  
 
 }

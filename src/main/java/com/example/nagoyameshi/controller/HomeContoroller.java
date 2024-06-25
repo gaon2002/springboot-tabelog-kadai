@@ -39,11 +39,11 @@ public class HomeContoroller {
         Map<Integer, Double> houseAverageScore = new HashMap<>();
         
         for (House house : newHouses) {
-            Double averageScore = reviewService.getHouseAverageScore(house.getId());
+            Double averageScore = houseService.getHouseAverageScore(house.getId());
             houseAverageScore.put(house.getId(), averageScore);
         }
         
-//    人気順
+//    人気順5件表示（HouseServiceで）
         List<HouseScoreDto> houseScore = houseService.getHousesOrderedByAverageScore();
 
       

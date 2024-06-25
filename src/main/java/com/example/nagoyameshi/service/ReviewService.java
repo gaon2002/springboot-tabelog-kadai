@@ -141,11 +141,5 @@ public class ReviewService {
         
 	}
 
-//	店舗のスコア平均を計算して出力する
-	public Double getHouseAverageScore(Integer houseId) {
-		
-        return reviewRepository.findAverageScoreByHouseId(houseId);
-    }
-
 
 }

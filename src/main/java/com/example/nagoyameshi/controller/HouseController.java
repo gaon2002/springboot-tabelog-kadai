@@ -25,6 +25,7 @@ import com.example.nagoyameshi.repository.HouseRepository;
 import com.example.nagoyameshi.repository.ReviewRepository;
 import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.FavoriteService;
+import com.example.nagoyameshi.service.HouseService;
 import com.example.nagoyameshi.service.ReviewService;
 
 @Controller
@@ -34,12 +35,14 @@ public class HouseController {
 	private final ReviewRepository reviewRepository;
 	private final ReviewService reviewService;
 	private final FavoriteService favoriteService;     
+	private final HouseService houseService;
     
-	public HouseController(HouseRepository houseRepository, ReviewRepository reviewRepository, ReviewService reviewService, FavoriteService favoriteService) {
+	public HouseController(HouseRepository houseRepository, ReviewRepository reviewRepository, ReviewService reviewService, FavoriteService favoriteService, HouseService houseService) {
 		this.houseRepository = houseRepository;
 		this.reviewRepository = reviewRepository;
 		this.reviewService = reviewService;
-		this.favoriteService = favoriteService;           
+		this.favoriteService = favoriteService;      
+		this.houseService = houseService;
     }     
   
     @GetMapping
@@ -58,6 +61,9 @@ public class HouseController {
         	if (order != null && order.equals("priceMinAsc")) {
 //        		並べ替え：最小利用金額の小さい順
                 housePage = houseRepository.findByNameLikeOrAddressLikeOrderByPriceMinAsc("%" + keyword + "%", "%" + keyword + "%", pageable);
+        	} else if ("scoreDesc".equals(order)) {
+//              スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSorted(keyword, keyword, pageable);
             } else {
 //        		並べ替え：新着順
                 housePage = houseRepository.findByNameLikeOrAddressLikeOrderByCreatedAtDesc("%" + keyword + "%", "%" + keyword + "%", pageable);
@@ -65,6 +71,9 @@ public class HouseController {
         } else if (area != null && !area.isEmpty()) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByAddressLikeOrderByPriceMinAsc("%" + area + "%", pageable);
+        	} else if ("scoreDesc".equals(order)) {
+//              スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSorted(area, area, pageable);
             } else {
                 housePage = houseRepository.findByAddressLikeOrderByCreatedAtDesc("%" + area + "%", pageable);
             }     
@@ -72,6 +81,9 @@ public class HouseController {
         } else if (priceMin != null && priceMax != null) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByPriceMinAsc(priceMax, priceMin, pageable);
+        	} else if ("scoreDesc".equals(order)) {
+//              スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSortedGreaterAndLess(priceMax, priceMin, pageable);
             } else {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMax, priceMin, pageable);
             }     
@@ -80,6 +92,9 @@ public class HouseController {
         } else if (priceMin != null && priceMax == null) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualOrderByPriceMinAsc(priceMin, pageable);
+        	} else if ("scoreDesc".equals(order)) {
+//              スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSortedGreater(priceMin, pageable);
             } else {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualOrderByCreatedAtDesc(priceMin, pageable);
             }   
@@ -88,6 +103,9 @@ public class HouseController {
         } else if (priceMin == null && priceMax != null) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByPriceMaxLessThanEqualOrderByPriceMinAsc(priceMax, pageable);
+        	} else if ("scoreDesc".equals(order)) {
+//              スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSortedLess(priceMax, pageable);
             } else {
                 housePage = houseRepository.findByPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMax, pageable);
             }  
@@ -95,30 +113,27 @@ public class HouseController {
         } else {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findAllByOrderByPriceMinAsc(pageable);
+        	} else if (order != null && "scoreDesc".equals(order)) {
+                // スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSortedAll(pageable);
             } else {
                 housePage = houseRepository.findAllByOrderByCreatedAtDesc(pageable);   
             }        
         }       
         	
-   	
-////      人気順
-//        } else if (order != null && order.equals("priceMinAsc") {
-//            List<HouseScoreDto> houseScore = houseService.getHousesOrderedByAverageScore();
-//        	
-//        }                
-//            model.addAttribute("houseScore", houseScore);
-        
-        
-
         
 //    	店舗のスコア平均を計算して出力する
         Map<Integer, Double> houseAverageScore = new HashMap<>();
         
         for (House house : housePage) {
-            Double averageScore = reviewService.getHouseAverageScore(house.getId());
+            Double averageScore = houseService.getHouseAverageScore(house.getId());
             houseAverageScore.put(house.getId(), averageScore);
         }
        
+//      店舗カテゴリ情報を埋め込む
+        
+        
+        
         
         model.addAttribute("housePage", housePage);
         model.addAttribute("keyword", keyword);
@@ -165,7 +180,7 @@ public class HouseController {
         
 
 //    	店舗のスコア平均を計算して出力する
-    	Double houseAverageScore = reviewService.getHouseAverageScore(id);
+    	Double houseAverageScore = houseService.getHouseAverageScore(id);
 
         // 『店舗詳細ビューに渡すデータ』
         model.addAttribute("house", house);
