@@ -122,14 +122,12 @@ public class AuthController {
             model.addAttribute("errorMessage", errorMessage);
         }
         
-        
 //      会員用の店舗一覧に戻りたい
         return "auth/verify";   
+    }
         
-    }    
 
-   
-    
+
 ////  メール認証後ログイン状態にしておくためのメソッド
 //    private void authenticateUser(User user) {
 //    	Collection<GrantedAuthority> authorities = user.getRoles();  // userからroles/authoritiesを取得

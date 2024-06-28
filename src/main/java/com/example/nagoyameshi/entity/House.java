@@ -1,12 +1,18 @@
 package com.example.nagoyameshi.entity;
 
 import java.sql.Timestamp;
+import java.util.Objects;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -61,11 +67,35 @@ public class House {
      private Timestamp updatedAt;
      
      
-//     Houseエンティティで@OneToMany関係を定義し、そのフェッチタイプをLAZYにしている場合、セッションが閉じられた後にそのプロパティにアクセスしようとすると、LazyInitializationExceptionが発生します。この問題を解決するために、以下の方法を検討できます。
+//     Houseエンティティで@OneToMany関係を定義し、そのフェッチタイプをLAZYにしている場合、
+//     セッションが閉じられた後にそのプロパティにアクセスしようとすると、LazyInitializationExceptionが発生します。
      
-//     @OneToMany(mappedBy = "house")
-//     private Set<HousesCategory> houseCategories = new HashSet<>();
+     @ManyToMany(fetch = FetchType.EAGER)	//@ManyToManyのフェッチタイプをEAGERに変更すると、関連エンティティが即座にロードされる。ただし、これにはパフォーマンス上の影響があります。
+     @JoinTable(
+    		 name = "houses_category",
+    		 joinColumns = @JoinColumn(name = "house_id"),
+    		 inverseJoinColumns = @JoinColumn(name = "category_id")
+     )
+     private Set<Category> categories;
+     // getters and setters
+     
+     
+//   エンティティ間の相互参照によって無限ループが発生しているための対策。
+//       ・HouseエンティティとCategoryエンティティがお互いにhashCodeメソッドを呼び出し合い、スタックオーバーフローが発生する。
+//     	 ・この問題を解決のため、hashCodeおよびequalsメソッドを適切にオーバーライドする必要がある。
+//     	 ・@Dataアノテーションを使用しているため、hashCodeおよびequalsメソッドも自動生成されているが、これらを手動でオーバーライドすることで、エンティティの比較に使うフィールドを制御。
+     @Override
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         House house = (House) o;
+         return id.equals(house.id);
+     }
 
- 
+     @Override
+     public int hashCode() {
+         return Objects.hash(id);
+     }
+
 
 }

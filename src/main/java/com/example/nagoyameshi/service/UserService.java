@@ -1,14 +1,20 @@
 package com.example.nagoyameshi.service;
 
 
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.nagoyameshi.entity.PasswordResetToken;
 import com.example.nagoyameshi.entity.Role;
 import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.form.SignupForm;
 import com.example.nagoyameshi.form.UserEditForm;
+import com.example.nagoyameshi.form.UserPasswordChangeForm;
+import com.example.nagoyameshi.repository.PasswordResetTokenRepository;
 import com.example.nagoyameshi.repository.RoleRepository;
 import com.example.nagoyameshi.repository.UserRepository;
 
@@ -19,11 +25,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;        
         this.passwordEncoder = passwordEncoder;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }    
     
 //    ユーザー新規登録
@@ -116,9 +124,69 @@ public class UserService {
         userRepository.save(user);
     }    
     
-    // メールアドレスが変更されたかどうかをチェックする
+//	メールアドレスが変更されたかどうかをチェックする
     public boolean isEmailChanged(UserEditForm userEditForm) {
         User currentUser = userRepository.getReferenceById(userEditForm.getId());
         return !userEditForm.getEmail().equals(currentUser.getEmail());      
     }  
+    
+//  パスワード変更
+    @Transactional
+    public boolean changePassword(Integer userId, UserPasswordChangeForm userPasswordChangeForm) {
+        User user = userRepository.getReferenceById(userId);
+        
+        if (user == null || !passwordEncoder.matches(userPasswordChangeForm.getCurrentPassword(), user.getPassword())) {
+            return false;
+        }
+
+//      パスワードはハッシュ化：SpringSecurityが提供するPasswordEncoderインターフェースのencode()メソッドを利用。
+        user.setPassword(passwordEncoder.encode(userPasswordChangeForm.getNewPassword()));
+        
+        userRepository.save(user);
+        return true;
+    }
+    
+    
+//  ユーザーとパスワードリセットトークンの処理を行うサービス層を実装。
+    public void createPasswordResetTokenForUser(String email, String token) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("ユーザーが見つかりません。");
+        }
+        PasswordResetToken myToken = new PasswordResetToken();
+        myToken.setToken(token);
+        myToken.setUser(user);
+        myToken.setExpiryDate(calculateExpiryDate(24 * 60));
+        passwordResetTokenRepository.save(myToken);
+    }
+
+    public PasswordResetToken getPasswordResetToken(String token) {
+        return passwordResetTokenRepository.findByToken(token);
+    }
+
+    public boolean updatePassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token);
+        if (resetToken == null) {
+            return false;
+        }
+        Calendar cal = Calendar.getInstance();
+        if ((resetToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+            return false;
+        }
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        passwordResetTokenRepository.delete(resetToken);
+        return true;
+    }
+
+ // トークンの有効期限を計算するメソッド
+    private Date calculateExpiryDate(int expiryTimeInMinutes) {
+        Calendar cal = Calendar.getInstance();	// 現在の日時を取得
+        cal.setTime(new Date());	// 現在の日時をカレンダーに設定
+        cal.add(Calendar.MINUTE, expiryTimeInMinutes);	// 有効期限を分単位で追加
+        return new Date(cal.getTime().getTime());	// 有効期限の日時を返す
+    }
 }
+
+

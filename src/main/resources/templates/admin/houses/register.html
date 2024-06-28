@@ -27,6 +27,11 @@
 							
 							<h1 class="mb-4 text-center">店舗登録</h1>
 							
+<!--                        更新内容に誤りがある時はメッセージを表示させる-->
+                            <div th:if="${errorMessage}" class="alert alert-danger">
+                                <span th:text="${errorMessage}"></span>
+                            </div>  
+							
 <!--							formy要素の説明-->
 <!--							・form要素の属性にpostを指定：get/postを指定できる-->
 <!--								HTML GET：単純にページを表示する場合など、サーバーから情報を取得するために使う-->
@@ -143,6 +148,22 @@
 										<div th:if="${#fields.hasErrors('phoneNumber')}" class="text-danger small mb-2" th:errors="*{phoneNumber}"></div>
 										<input type="text" class="form-control" th:field="*{phoneNumber}">
 									</div>
+								</div>
+								
+<!--							カテゴリー入力-->
+								<div class="form-group row mb-3">
+									<div class="col-md-4">
+										<label for="categories" class="col-form-label text-md-left fw-bold">カテゴリー</label>
+									</div>
+									
+									<div class="col-md-8">
+										<div th:if="${#fields.hasErrors('categoryIds')}"  class="text-danger small mb-2"  th:errors="*{categoryIds}"></div>
+							            <div th:each="category : ${categories}" class="form-check form-check-inline">
+							                <input type="checkbox" class="form-check-input" th:value="${category.id}" th:field="*{categoryIds}" th:id="${category.id}">
+							                <label th:for="${category.id}" th:text="${category.category}"></label>
+							            </div>
+                                    </div>
+
 								</div>
 									
 								<div class="form-group d-flex justify-content-center my-4">

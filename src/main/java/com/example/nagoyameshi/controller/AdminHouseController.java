@@ -1,6 +1,8 @@
 package com.example.nagoyameshi.controller;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,10 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.House;
+import com.example.nagoyameshi.entity.HousesCategory;
 import com.example.nagoyameshi.form.HouseEditForm;
 import com.example.nagoyameshi.form.HouseRegisterForm;
+import com.example.nagoyameshi.repository.CategoryRepository;
 import com.example.nagoyameshi.repository.HouseRepository;
+import com.example.nagoyameshi.repository.HousesCategoryRepository;
 import com.example.nagoyameshi.service.HouseService;
 
 
@@ -34,12 +40,16 @@ public class AdminHouseController {
 //		※今回は、AdminHouseRepositoryを作成せず、HouseRepositoryからオブジェクトを引用している
 //	依存先のオブジェクトをfinalで宣言(コンストラクタインジェクション)
 	private final HouseRepository houseRepository;
+	private final CategoryRepository categoryRepository;
 	private final HouseService houseService;
+	private final HousesCategoryRepository housesCategoryRepository;
 	
 //	本来はコンストラクタに「@Autowired」を付けるが、コンストラクタがひとつの場合は省略可能
-	public AdminHouseController(HouseRepository houseRepository, HouseService houseService) {
+	public AdminHouseController(HouseRepository houseRepository, HouseService houseService, CategoryRepository categoryRepository, HousesCategoryRepository housesCategoryRepository) {
 		 this.houseRepository = houseRepository;
+		 this.categoryRepository = categoryRepository;
 		 this.houseService = houseService;
+		 this.housesCategoryRepository = housesCategoryRepository;
 	}
 	
 	@GetMapping
@@ -70,33 +80,48 @@ public class AdminHouseController {
 //	店舗詳細（管理者用）表示
 	 @GetMapping("/{id}")
      public String show(@PathVariable(name = "id") Integer id, Model model) {
-		 Optional<House> houseOpt = houseRepository.findById(id);
+		Optional<House> houseOpt = houseRepository.findById(id);
 	        if (!houseOpt.isPresent()) {
 	            // ハウスが見つからない場合のエラーハンドリングを追加する
 	            return "error/404"; // 例: 404ページにリダイレクト
 	        }
 	        
-	     House house = houseOpt.get();
+	    House house = houseOpt.get();
+	     
+    	List<Category> categories = categoryRepository.findAll();	  
+
+	    model.addAttribute("categories", categories);
+	    model.addAttribute("house", house);
          
-         model.addAttribute("house", house);
-         
-         return "admin/houses/show";
+        return "admin/houses/show";
 	 }
 	 
-//	 まず、ビューにフォームクラスのインスタンスを渡す
+	 
+	 
+//	 ＜店舗情報登録➀＞まず、ビューにフォームクラスのインスタンスを渡す
 	 @GetMapping("/register")
      public String register(Model model) {
+		 
+		 List<Category> categories = houseService.getAllCategories();
+		 
          model.addAttribute("houseRegisterForm", new HouseRegisterForm());
+         model.addAttribute("categories", categories);
+         
          return "admin/houses/register";
      }   
 	 
-//	 ＜店舗情報登録＞
+//	 ＜店舗情報登録➁＞
 	 @PostMapping("/create")
 //	 メソッドの引数に@ModelAttributeアノテーションをつけ、フォームから送信されたデータ（フォームクラスのインスタンス）をその引数にバインド（割り当て）できる
      public String create(@ModelAttribute @Validated HouseRegisterForm houseRegisterForm,
     		 			  BindingResult bindingResult,
-    		 			  RedirectAttributes redirectAttributes) {        
+    		 			  RedirectAttributes redirectAttributes,
+    		 			  Model model) {        
+		 
          if (bindingResult.hasErrors()) {
+        	 List<Category> categories = categoryRepository.findAll();
+		         model.addAttribute("categories", categories);
+	        	 model.addAttribute("errorMessage", "編集内容に誤りがあります。詳細は各項目を確認してください。");
              return "admin/houses/register";
          }
          
@@ -108,7 +133,7 @@ public class AdminHouseController {
          return "redirect:/admin/houses";
 	 }
 	 
-//	 ＜店舗情報編集：元情報をビューに渡すSTEP＞
+//	 ＜店舗情報編集➀：元情報をビューに渡すSTEP＞
 	 @GetMapping("/{id}/edit")
      public String edit(@PathVariable(name = "id") Integer id, Model model) {
 //		 該当するidの情報をhousesテーブルから取得する
@@ -120,27 +145,69 @@ public class AdminHouseController {
         }
         
         House house = houseOpt.get();
+        
+        List<HousesCategory> housesCategories = housesCategoryRepository.findByHouseId(id);
+        
+//      categoryIds には housesCategories リスト内の各 HousesCategory オブジェクトに対応する Category の id が含まれたリストを得る。
+        List<Integer> categoryIds = housesCategories.stream()
+//        							※hcはHousesCategoryの略
+//									※.map(HousesCategory::getCategoryId)を使うのであれば、HousesCategoryに以下を設定する必要がある。
+//						        		【CategoryのIDを取得するゲッタメソッド】
+//							        	    public Integer getCategoryId() {
+//							        	        return category.getId();
+//							        	    }
+//        							streamJava Stream APIを使ってリストの各要素を別の形式に変換する操作。
+//        							・この場合、hc（HousesCategoryオブジェクト）を取り、その関連するCategoryオブジェクトのidフィールドを取得。
+//        								-hc.getCategory() は HousesCategory オブジェクトから関連する Category オブジェクトを取得
+//        								-hc.getCategory().getId() はその Category オブジェクトの id フィールドを取得
+        							.map(hc -> hc.getCategory().getId())
+        							.collect(Collectors.toList());
          
          String imageName = house.getImageName();
          
 //       フォームクラスをインスタンス化
-         HouseEditForm houseEditForm = new HouseEditForm(house.getId(), house.getName(), null, house.getDescription(), house.getPriceMax(), house.getPriceMin(), house.getCapacity(), house.getPostalCode(), house.getAddress(), house.getPhoneNumber());
+         HouseEditForm houseEditForm = new HouseEditForm(house.getId(), 
+        		 										 house.getName(),
+        		 										 null,
+        		 										 house.getDescription(),
+        		 										 house.getPriceMax(),
+        		 										 house.getPriceMin(),
+        		 										 house.getCapacity(),
+        		 										 house.getPostalCode(),
+        		 										 house.getAddress(),
+        		 										 house.getPhoneNumber(),
+//        		 										 リストは別で作成する
+        		 										 categoryIds
+        		 										);
+
+         // カテゴリのリストをモデルに追加
+         List<Category> categories = categoryRepository.findAll();
          
          model.addAttribute("imageName", imageName);
+         model.addAttribute("categories", categories);
 //       インスタンス化したフォームクラスの値をビューに返す（コンストラクタは"houseEditForm"で作成済み）
          model.addAttribute("houseEditForm", houseEditForm);
          
          return "admin/houses/edit";
      }    
 	 
-//	 ＜店舗情報編集：元情報をビューに渡すSTEP＞
+//	 ＜店舗情報編集➁：変更した情報をビューに渡すSTEP＞
 	 @PostMapping("/{id}/update")
      public String update(@ModelAttribute @Validated HouseEditForm houseEditForm,
     		 			  BindingResult bindingResult,
-    		 			  RedirectAttributes redirectAttributes) { 
+    		 			  RedirectAttributes redirectAttributes,
+    		 			  Model model)
+	 { 
+		 
 //		 エラーがあれば、editビューに表示
 		 if (bindingResult.hasErrors()) {
+			 
+			 List<Category> categories = categoryRepository.findAll();
+	            model.addAttribute("categories", categories);
+	            model.addAttribute("errorMessage", "編集内容に誤りがあります。詳細は各項目を確認してください。");
+			 
              return "admin/houses/edit";
+             
          }
          
 //		 houseServiceのupdate()を実行

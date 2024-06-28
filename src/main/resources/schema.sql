@@ -123,3 +123,12 @@ ALTER TABLE houses_category DROP FOREIGN KEY houses_category_ibfk_2;
 ALTER TABLE houses_category
 ADD CONSTRAINT houses_category_ibfk_2
 FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE;
+
+-- password_reset_tokenテーブル生成とフィールド設定のコマンド
+ CREATE TABLE IF NOT EXISTS password_reset_token (
+    id 				INT 			NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id 		INT 			NOT NULL UNIQUE,
+    token 			VARCHAR(255) 	NOT NULL,        
+    expiry_date		DATETIME 		NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) 
+ );

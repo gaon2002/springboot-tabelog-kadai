@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.House;
 import com.example.nagoyameshi.entity.Review;
 import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.form.ReservationInputForm;
+import com.example.nagoyameshi.repository.CategoryRepository;
 import com.example.nagoyameshi.repository.HouseRepository;
 import com.example.nagoyameshi.repository.ReviewRepository;
 import com.example.nagoyameshi.security.UserDetailsImpl;
@@ -31,15 +33,18 @@ import com.example.nagoyameshi.service.ReviewService;
 @Controller
 @RequestMapping("/houses")
 public class HouseController {
+	private static final int List = 0;
 	private final HouseRepository houseRepository;
+	private final CategoryRepository categoryRepository;
 	private final ReviewRepository reviewRepository;
 	private final ReviewService reviewService;
 	private final FavoriteService favoriteService;     
 	private final HouseService houseService;
     
-	public HouseController(HouseRepository houseRepository, ReviewRepository reviewRepository, ReviewService reviewService, FavoriteService favoriteService, HouseService houseService) {
+	public HouseController(HouseRepository houseRepository, ReviewRepository reviewRepository, ReviewService reviewService, FavoriteService favoriteService, HouseService houseService, CategoryRepository categoryRepository) {
 		this.houseRepository = houseRepository;
 		this.reviewRepository = reviewRepository;
+		this.categoryRepository = categoryRepository;
 		this.reviewService = reviewService;
 		this.favoriteService = favoriteService;      
 		this.houseService = houseService;
@@ -51,12 +56,15 @@ public class HouseController {
                         @RequestParam(name = "priceMin", required = false) Integer priceMin,
                         @RequestParam(name = "priceMax", required = false) Integer priceMax,
                         @RequestParam(name = "order", required = false) String order,
+                        @RequestParam(name = "categoryIds", required = false) List<Integer> category,
                         @PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable,
                         Model model) 
     {
+		List<Category> categories = categoryRepository.findAll();	    
     	
         Page<House> housePage;
         
+//      キーワード検索
         if (keyword != null && !keyword.isEmpty()) {
         	if (order != null && order.equals("priceMinAsc")) {
 //        		並べ替え：最小利用金額の小さい順
@@ -68,6 +76,7 @@ public class HouseController {
 //        		並べ替え：新着順
                 housePage = houseRepository.findByNameLikeOrAddressLikeOrderByCreatedAtDesc("%" + keyword + "%", "%" + keyword + "%", pageable);
             }   
+//      エリア検索
         } else if (area != null && !area.isEmpty()) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByAddressLikeOrderByPriceMinAsc("%" + area + "%", pageable);
@@ -77,7 +86,7 @@ public class HouseController {
             } else {
                 housePage = houseRepository.findByAddressLikeOrderByCreatedAtDesc("%" + area + "%", pageable);
             }     
-//        ※利用金額の下限と上限を設定して検索
+//      ※利用金額の下限と上限を設定して検索
         } else if (priceMin != null && priceMax != null) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByPriceMinAsc(priceMax, priceMin, pageable);
@@ -88,7 +97,7 @@ public class HouseController {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMax, priceMin, pageable);
             }     
         	
-//        ※利用金額の下限を設定して検索
+//      ※利用金額の下限を設定して検索
         } else if (priceMin != null && priceMax == null) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualOrderByPriceMinAsc(priceMin, pageable);
@@ -99,7 +108,7 @@ public class HouseController {
                 housePage = houseRepository.findByPriceMinGreaterThanEqualOrderByCreatedAtDesc(priceMin, pageable);
             }   
 
-//        ※利用金額の上限を設定して検索
+//      ※利用金額の上限を設定して検索
         } else if (priceMin == null && priceMax != null) {
         	if (order != null && order.equals("priceMinAsc")) {
                 housePage = houseRepository.findByPriceMaxLessThanEqualOrderByPriceMinAsc(priceMax, pageable);
@@ -109,42 +118,53 @@ public class HouseController {
             } else {
                 housePage = houseRepository.findByPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMax, pageable);
             }  
+        
+//       ※カテゴリー検索
+         } else if (category != null && category != null) {
+         	if (order != null && order.equals("priceMinAsc")) {
+	         	housePage = houseRepository.findByCategoryIdsOrderByPriceMinAsc(category, pageable);
+         	} else if ("scoreDesc".equals(order)) {
+//              スコアの高い順に並べ替え
+        		housePage = houseService.getHouseAverageScoreSortedCategory(category, pageable);
+	        } else {
+	           	housePage = houseRepository.findByCategoryIdsOrderByCreatedAtDesc(category, pageable);
+	        }  
         	
+//        	※検索内容がなかったら全表示
         } else {
         	if (order != null && order.equals("priceMinAsc")) {
-                housePage = houseRepository.findAllByOrderByPriceMinAsc(pageable);
-        	} else if (order != null && "scoreDesc".equals(order)) {
-                // スコアの高い順に並べ替え
-        		housePage = houseService.getHouseAverageScoreSortedAll(pageable);
-            } else {
-                housePage = houseRepository.findAllByOrderByCreatedAtDesc(pageable);   
-            }        
-        }       
+        		housePage = houseRepository.findAllByOrderByPriceMinAsc(pageable);
+			} else if (order != null && "scoreDesc".equals(order)) {
+			    // スコアの高い順に並べ替え
+				housePage = houseService.getHouseAverageScoreSortedAll(pageable);
+			} else {
+			    housePage = houseRepository.findAllByOrderByCreatedAtDesc(pageable);   
+			}
+        }
         	
         
 //    	店舗のスコア平均を計算して出力する
-        Map<Integer, Double> houseAverageScore = new HashMap<>();
-        
-        for (House house : housePage) {
-            Double averageScore = houseService.getHouseAverageScore(house.getId());
-            houseAverageScore.put(house.getId(), averageScore);
-        }
+	        Map<Integer, Double> houseAverageScore = new HashMap<>();
+	        
+	        for (House house : housePage) {
+	        	
+	            Double averageScore = houseService.getHouseAverageScore(house.getId());
+	            
+	            houseAverageScore.put(house.getId(), averageScore);
+	        }
+	        
        
-//      店舗カテゴリ情報を埋め込む
         
-        
-        
-        
+        model.addAttribute("categories", categories);
         model.addAttribute("housePage", housePage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("area", area);
         model.addAttribute("priceMax", priceMax);         
         model.addAttribute("priceMin", priceMin); 
+        model.addAttribute("categoryIds", category); 
         model.addAttribute("order", order);
         model.addAttribute("houseAverageScore", houseAverageScore);
-        
-        
- 
+
         return "houses/index";
     }
 
@@ -181,8 +201,12 @@ public class HouseController {
 
 //    	店舗のスコア平均を計算して出力する
     	Double houseAverageScore = houseService.getHouseAverageScore(id);
+    	
+//    	カテゴリ表示
+    	List<Category> categories = categoryRepository.findAll();	  
 
         // 『店舗詳細ビューに渡すデータ』
+    	model.addAttribute("categories", categories);
         model.addAttribute("house", house);
         model.addAttribute("reservationInputForm", new ReservationInputForm());
         model.addAttribute("reviews", newReviews);

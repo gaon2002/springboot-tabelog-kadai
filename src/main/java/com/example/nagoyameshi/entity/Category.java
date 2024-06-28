@@ -1,7 +1,7 @@
 package com.example.nagoyameshi.entity;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -9,7 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -43,7 +43,24 @@ public class Category {
      @Column(name = "updated_at", insertable = false, updatable = false)
      private Timestamp updatedAt;
      
-     @OneToMany(mappedBy = "category")
-     private Set<HousesCategory> houseCategories = new HashSet<>();
+     @ManyToMany(mappedBy = "categories")
+     private Set<House> houses;
+     // getters and setters
+     
+     
+//   hashCodeおよびequalsメソッドを手動でオーバーライドすることで、エンティティ間の無限ループを防ぎ
+     @Override
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Category category = (Category) o;
+         return id.equals(category.id);
+     }
+
+     @Override
+     public int hashCode() {
+         return Objects.hash(id);
+     }
+     
 }
 

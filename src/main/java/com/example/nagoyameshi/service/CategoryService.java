@@ -13,14 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.form.CategoryEditForm;
 import com.example.nagoyameshi.form.CategoryRegisterForm;
-import com.example.nagoyameshi.repository.CategoryReository;
+import com.example.nagoyameshi.repository.CategoryRepository;
 
 @Service
 public class CategoryService {
 	
-    private final CategoryReository categoryRepository;    
+    private final CategoryRepository categoryRepository;    
     
-    public CategoryService(CategoryReository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;        
     }    
 

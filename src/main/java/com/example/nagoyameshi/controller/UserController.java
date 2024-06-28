@@ -17,12 +17,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.form.UserEditForm;
+import com.example.nagoyameshi.form.UserPasswordChangeForm;
 import com.example.nagoyameshi.repository.UserRepository;
 import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.StripeService;
 import com.example.nagoyameshi.service.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
+
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/user")
@@ -39,17 +43,18 @@ public class UserController {
          
 //  ユーザー情報の確認
     @GetMapping
+    @Transactional
     public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
 //    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
 //    	userRepositoryからgetReferenceById()を使って最新情報を取得する
-        User user = userRepository.getReferenceById(userDetailsImpl.getUser().getId());  
+    	User user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
         
         model.addAttribute("user", user);
         
         return "user/index";
     }
     
-//  ユーザー情報の編集：フォームへ元情報をセットする
+//  ユーザー情報の編集➀：フォームへ元情報をセットする
     @GetMapping("/edit")
     public String edit(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {        
         User user = userRepository.getReferenceById(userDetailsImpl.getUser().getId());  
@@ -62,7 +67,7 @@ public class UserController {
         return "user/edit";
     }    
     
-//    編集されたユーザー情報を更新する
+//  ユーザー情報の編集➁：編集されたユーザー情報を更新する
     @PostMapping("/update")
     public String update(@ModelAttribute @Validated UserEditForm userEditForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         // メールアドレスが変更されており、かつ登録済みであれば、BindingResultオブジェクトにエラー内容を追加する
@@ -138,8 +143,41 @@ public class UserController {
     		model.addAttribute("error", e.getMessage());
             return "error";
     	}
-
-        
     }
+    
+//    パスワード変更➀：パスワード変更画面の表示
+      @GetMapping("/UserPasswordChange")
+      @Transactional
+      public String showChangePasswordForm(Model model) {
+    	  
+          model.addAttribute("UserPasswordChangeForm", new UserPasswordChangeForm());
+          return "user/UserPasswordChange";
+      }
+
+//    パスワード変更➁入力された現行パスワードと新パスワードを受け取り、処理
+      @PostMapping("/change-password")
+      @Transactional
+      public String changePassword(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+                                   @Valid UserPasswordChangeForm userPasswordChangeForm,
+                                   BindingResult bindingResult,
+                                   RedirectAttributes redirectAttributes,
+                                   Model model)
+      {
+          if (bindingResult.hasErrors()) {
+        	  model.addAttribute("UserPasswordChangeForm", userPasswordChangeForm); 
+              return "user/UserPasswordChange";
+          }
+
+          boolean success = userService.changePassword(userDetailsImpl.getUser().getId(), userPasswordChangeForm);
+          if (!success) {
+              model.addAttribute("errorMessage", "現在のパスワードが正しくありません。");
+              model.addAttribute("UserPasswordChangeForm", userPasswordChangeForm); 
+              return "user/UserPasswordChange";
+          }
+
+          redirectAttributes.addFlashAttribute("successMessage", "パスワードが変更されました。");
+//          model.addAttribute("UserPasswordChangeForm", new UserPasswordChangeForm()); // 成功時に新しいフォームオブジェクトを設定
+          return "redirect:/houses";
+      }
 
 }

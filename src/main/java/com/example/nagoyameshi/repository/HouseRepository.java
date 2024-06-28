@@ -47,7 +47,11 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
     public Page<House> findByPriceMaxLessThanEqualOrderByPriceMinAsc(Integer priceMax, Pageable pageable);
 	
 //  新着5件表示
-    public List<House> findTop5ByOrderByCreatedAtDesc();
+//    houseRepositoryにJOIN FETCHを使用して関連エンティティをロードするようする。
+//    特にfindTop5ByOrderByCreatedAtDescメソッドに対して、関連エンティティをフェッチするクエリを作成。
+    
+    @Query("SELECT h FROM House h LEFT JOIN FETCH h.categories ORDER BY h.createdAt DESC")
+    List<House> findAllWithCategoriesOrderedByCreatedAtDesc();
     
 //  お気に入り一覧に表示するコマンド
     public Page<House> findByIdIn(List<Integer> houseList, Pageable pageable);
@@ -82,24 +86,41 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
         @Param("ids") List<Integer> ids,
         Pageable pageable);
     
-    
-    @Query("SELECT h FROM House h WHERE (h.priceMin >= :priceMin AND h.priceMax <= :priceMax) AND h.id IN :ids")
+//  利用金額指定
+    @Query("SELECT h FROM House h WHERE h.priceMin >= :priceMin AND h.priceMax <= :priceMax AND h.id IN :ids")
     public Page<House> findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqual(
         @Param("priceMax") Integer priceMax, 
         @Param("priceMin") Integer priceMin, 
         @Param("ids") List<Integer> ids,
         Pageable pageable);
-    
-    @Query("SELECT h FROM House h WHERE (h.priceMin >= :priceMin) AND h.id IN :ids")
+//  利用金額下限値指定
+    @Query("SELECT h FROM House h WHERE h.priceMin >= :priceMin AND h.id IN :ids")
     public Page<House> findByPriceMinGreaterThanEqual(
         @Param("priceMin") Integer priceMin, 
         @Param("ids") List<Integer> ids,
         Pageable pageable);
-    
-    @Query("SELECT h FROM House h WHERE (h.priceMax <= :priceMax) AND h.id IN :ids")
+//  利用金額上限値指定
+    @Query("SELECT h FROM House h WHERE h.priceMax <= :priceMax AND h.id IN :ids")
     public Page<House> findByPriceMaxLessThanEqual(
         @Param("priceMax") Integer priceMax, 
         @Param("ids") List<Integer> ids,
         Pageable pageable);
+    
 
+    
+//  カテゴリー検索（値段の安い順）
+    @Query("SELECT h FROM House h JOIN h.categories c WHERE c.id IN :categoryIds")
+    public Page<House> findByCategoryIdsOrderByPriceMinAsc(@Param("categoryIds") List<Integer> category, Pageable pageable);
+    
+//  カテゴリー検索（新着順）
+    @Query("SELECT h FROM House h JOIN h.categories c WHERE c.id IN :categoryIds")
+    public Page<House> findByCategoryIdsOrderByCreatedAtDesc(@Param("categoryIds") List<Integer> category, Pageable pageable);
+    
+//  カテゴリー検索（スコア順）
+    @Query("SELECT h FROM House h JOIN h.categories c WHERE c.id IN :categoryIds AND h.id IN :ids")
+    public Page<House> findByCategoryIdsOrderByScore(
+        @Param("categoryIds") List<Integer> category, 
+        @Param("ids") List<Integer> ids,
+        Pageable pageable);
+    
 }

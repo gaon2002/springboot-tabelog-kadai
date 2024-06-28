@@ -73,6 +73,18 @@
 						</div>
 					</div>
 					
+															
+<!--				■カテゴリ-->
+					<div class="row pb-2 mb-2 border-bottom">
+						<div class="col-4">
+							<span class="fw-bold">カテゴリ</span>
+						</div>
+						
+						<div class="col">
+							<span class="btn btn-outline-dark btn-sm me-2 mt-1" th:each="category : ${house.categories}" th:text="${category.category}"></span>
+						</div>
+					</div>
+					
 					<!-- 説明表示 -->
 					<div class="row pb-2 mb-2 border-bottom">
 						<div class="col-4">

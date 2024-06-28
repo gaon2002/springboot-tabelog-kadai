@@ -23,7 +23,13 @@
                                  <li class="breadcrumb-item active" aria-current="page">店舗一覧</li>
                              </ol>
                          </nav>         
-             
+                         
+<!--                     パスワード変更が出来たらここに成功メッセージを入れる-->
+                         <div th:if="${successMessage}" class="alert alert-success">
+                         	<span th:text="${successMessage}"></span>
+                         </div>      
+                         
+<!--					 左側のページ-->
                          <div class="col-xl-3 col-lg-4 col-md-12">               
                              <form method="get" th:action="@{/houses}" class="w-100 mb-3">
                                  <div class="input-group">
@@ -95,14 +101,42 @@
                                          </div>                                           
                                      </form>
                                  </div>
-                             </div>                               
+                             </div>   
+                             
+                             <div class="card mb-3">
+                                 <div class="card-header">
+                                   カテゴリーから探す
+                                 </div>
+                                 <div class="card-body">
+                                     <form method="get" th:action="@{/houses}" class="w-100">
+                                         <div class="form-group mb-3">
+											 
+									        <div th:each="category : ${categories}">
+									            <input type="checkbox" th:value="${category.id}" th:name="categoryIds" th:id="${category.id}">
+									            <label th:for="${category.id}" th:text="${category.category}"></label>
+									        </div>
+
+                                         </div>
+                                         <div class="form-group">
+                                             <button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">検索</button>
+                                         </div>                                           
+                                     </form>
+                                 </div>
+                             </div>    
+                             
+                                                         
                          </div>
+                         
+
              
                          <div class="col">                                                                          
                              <div class="d-flex justify-content-between flex-wrap">      
 <!--							検索結果表示                          -->
                                  <p th:if="${housePage.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePage.getTotalElements() + '件' + '（' + (housePage.getNumber() + 1) + ' / ' + housePage.getTotalPages() + ' ページ）'}"></p> 
-                                 <p th:unless="${housePage.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePage.getTotalElements() + '件'}"></p>     
+                                 <p th:unless="${housePage.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePage.getTotalElements() + '件'}"></p>
+                                 
+<!--                             検索キーワード                          -->
+                                 <p class="fs-5 mb-3" th:text="${'検索ワード：' + keyword}"></p> 
                                        
 <!--                            並べ替え-->
                                  <form method="get" th:action="@{/houses}" class="mb-3 samuraitravel-sort-box"> 
@@ -135,10 +169,18 @@
                                                  <div class="card-body">                                    
                                                      <h3 class="card-title mb-3" th:text="${house.getName()}"></h3>
                                                      
-                                                     <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}">
-														 <span th:utext="${star <= houseAverageScore[house.id] ? '&#9733;' : '&#9734;'}"></span>
-													  </span>
-													  <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[house.id] != null ? houseAverageScore[house.id] : 'No reviews'}"></span>
+<!--                                                 スコア-->
+														<div>
+	                                                     <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}">
+															 <span th:utext="${star <= houseAverageScore[house.id] ? '&#9733;' : '&#9734;'}"></span>
+														  </span>
+														  <span class="card-title mb-3 text-danger font-weight-bold" th:text="${houseAverageScore[house.id] != null ? houseAverageScore[house.id] : 'No reviews'}"></span>
+													  	</div>
+													  
+<!--												  カテゴリ-->
+													  	<div class="card-text mb-1">
+														  <small class="btn btn-outline-dark btn-sm me-2 mt-1" th:each="category : ${house.categories}" th:text="${category.category}"></small>
+														</div>
   
                                                      <hr class="mb-3">
                                                      

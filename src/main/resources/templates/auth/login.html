@@ -33,12 +33,16 @@
 							メールアドレスまたはパスワードが正しくありません。
 						</div>
 						
+						<div th:if="${successMessage}" class="alert alert-danger">
+                        	<span th:text="${successMessage}"></span>
+                        </div>      
+						
 						<form th:action="@{/login}" method="post">
-<!--						ユーザー名(メールアドレス)登録-->
+<!--						ユーザー名(メールアドレス)入力-->
 							<div class="form-group mb-3">
 								<input type="text" class="form-control" name="username" autocomplete="email" placeholder="メールアドレス" autofocus>
 							</div>
-<!--						パスワード設定-->
+<!--						パスワード入力-->
 							<div class="form-group mb-3">
 								<input type="password" class="form-control" name="password" autocomplete="new-password" placeholder="パスワード">
 							</div>
@@ -55,6 +59,12 @@
 								会員登録
 							</a>
 						</div>
+						
+<!--						パスワードリセット-->
+						<div class="text-center">
+							<a th:href="@{/auth/UserNewPasswordIssue}">パスワードを忘れた</a>
+						</div>
+						
 					</div>
 				</div>
 			</div>

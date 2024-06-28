@@ -1,6 +1,10 @@
 package com.example.nagoyameshi.form;
 
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
+
+import com.example.nagoyameshi.custom.NotEmptyList;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -42,5 +46,8 @@ public class HouseRegisterForm {
 	@NotBlank(message = "電話番号を入力してください。")
 	private String phoneNumber;
 	
+	@NotEmptyList(message = "カテゴリを選択してください。")
+    private List<Integer> categoryIds;
+
 
 }

@@ -6,7 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,11 +21,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.nagoyameshi.dto.HouseScoreAvg;
 import com.example.nagoyameshi.dto.HouseScoreDto;
+import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.House;
+import com.example.nagoyameshi.entity.HousesCategory;
 import com.example.nagoyameshi.form.HouseEditForm;
 import com.example.nagoyameshi.form.HouseRegisterForm;
+import com.example.nagoyameshi.repository.CategoryRepository;
 import com.example.nagoyameshi.repository.HouseRepository;
+import com.example.nagoyameshi.repository.HousesCategoryRepository;
 import com.example.nagoyameshi.repository.ReviewRepository;
+
 
 
 
@@ -31,19 +38,25 @@ import com.example.nagoyameshi.repository.ReviewRepository;
 public class HouseService {
     private final HouseRepository houseRepository;
     private final ReviewRepository reviewRepository;  
+    private final CategoryRepository categoryRepository;  
+    private final HousesCategoryRepository housesCategoryRepository;
+
 
     
-    public HouseService(HouseRepository houseRepository, ReviewRepository reviewRepository) {
+    public HouseService(HouseRepository houseRepository, ReviewRepository reviewRepository, CategoryRepository categoryRepository, HousesCategoryRepository housesCategoryRepository) {
         this.houseRepository = houseRepository;    
         this.reviewRepository = reviewRepository;
+        this.categoryRepository = categoryRepository;
+        this.housesCategoryRepository = housesCategoryRepository;
     }    
     
     @Transactional
 //  @Transactionalアノテーション： データベース操作が完全に成功するか、すべて失敗するかのどちらかに白黒はっきりさせられるため、データの整合性を保つことができる
 //   ＜店舗情報登録＞
-    public void create(HouseRegisterForm houseRegisterForm) {
+    public House create(HouseRegisterForm houseRegisterForm) {
 //    	エンティティ（Houseクラス）をインスタンス化
         House house = new House();
+        
         
         MultipartFile imageFile = houseRegisterForm.getImageFile();
         
@@ -62,6 +75,8 @@ public class HouseService {
         }
         
 //      ViewからControllerを通してhouseRegisterFormに受け取った引数をインスタンス化したエンティティーの各フィールドにセットする
+        
+        
         house.setName(houseRegisterForm.getName());                
         house.setDescription(houseRegisterForm.getDescription());
         house.setPriceMax(houseRegisterForm.getPriceMax());
@@ -70,14 +85,25 @@ public class HouseService {
         house.setPostalCode(houseRegisterForm.getPostalCode());
         house.setAddress(houseRegisterForm.getAddress());
         house.setPhoneNumber(houseRegisterForm.getPhoneNumber());
+        
+        Set<Category> categories = new HashSet<>(categoryRepository.findAllById(houseRegisterForm.getCategoryIds()));
+        house.setCategories(categories);
                     
-        houseRepository.save(house);
+        return houseRepository.save(house);
     }  
+    
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
     
     @Transactional
 //  ＜店舗情報編集＞
     public void update(HouseEditForm houseEditForm) {
-        House house = houseRepository.getReferenceById(houseEditForm.getId());
+    	
+        House house = houseRepository.findById(houseEditForm.getId()).orElseThrow(() -> new RuntimeException("House not found"));
+
+        
+        
         MultipartFile imageFile = houseEditForm.getImageFile();
         
         if (!imageFile.isEmpty()) {
@@ -98,6 +124,20 @@ public class HouseService {
         house.setPhoneNumber(houseEditForm.getPhoneNumber());
                     
         houseRepository.save(house);
+        
+//      house.getId()で取得したハウスIDをもとに、そのハウスに関連するカテゴリーのエントリを削除。
+        housesCategoryRepository.deleteByHouseId(house.getId());
+        
+//		新しいカテゴリの関連を作成
+        List<HousesCategory> houseCategories = houseEditForm.getCategoryIds().stream()
+								                .map(categoryId -> {
+								                    Category category = categoryRepository.findById(categoryId)
+								                                          .orElseThrow(() -> new RuntimeException("Category not found"));
+								                    return new HousesCategory(null, house, category);
+								                })
+								                .collect(Collectors.toList());
+        
+        housesCategoryRepository.saveAll(houseCategories);
     }    
     
     
@@ -124,16 +164,23 @@ public class HouseService {
     } 
     
 //  houseRepositoryとreviewRepositoryを使用してデータを取得（TOPページに表示）
+    
     public List<HouseScoreDto> getHousesOrderedByAverageScore() {
-//    	レビューリポジトリからスコアTop5の店舗を取得
+//    	レビューリポジトリからhouseScoreにスコアの高い順からTop5のhouseIdを取得
         List<HouseScoreAvg> houseScores = reviewRepository.findHouseAverageScoresOrderedByScore();
-
+//      リストを作成
         List<HouseScoreDto> houseDtos = new ArrayList<>();
-        
+//      houseScores内のすべての HouseScoreAvg オブジェクトの getScore() メソッドを呼び出し、その結果を出力。
         for (HouseScoreAvg houseScore : houseScores) {
+//        	houseScore.getHouseId()を呼び出して、houseScoreオブジェクトからハウスのIDを取得
+//        	・houseRepository.findById(...)を呼び出して、そのIDに対応するHouseオブジェクトをデータベースから取得。
+//        	・取得されたHouseオブジェクトが存在する場合、そのオブジェクトをhouse変数に格納します。もし存在しない場合は、nullをhouse変数に格納。
             House house = houseRepository.findById(houseScore.getHouseId()).orElse(null);
             if (house != null) {
+//            	HouseScoreDtoをインスタンス化
                 HouseScoreDto dto = new HouseScoreDto();
+                
+//              インスタンス化したHouseScoreDtoにデータを格納
                 dto.setHouseId(house.getId());
                 dto.setName(house.getName());
                 dto.setImageName(house.getImageName());
@@ -146,6 +193,7 @@ public class HouseService {
                 dto.setPhoneNumber(house.getPhoneNumber());
                 dto.setAverageScore(houseScore.getAverageScore());
 
+//              houseDtosに格納したデータを返す
                 houseDtos.add(dto);
             }
         }
@@ -204,7 +252,7 @@ public class HouseService {
         return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
     }
     
-//  全てを表示後に並べ替えするメソッド
+//  全てを表示後に人気の高い順に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSortedAll(Pageable pageable) {
         List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
         List<Integer> ids = houseScores.stream()
@@ -288,7 +336,43 @@ public class HouseService {
         return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
     }
 
-
     
+//  カテゴリー検索表示後に並べ替えするメソッド
+    public Page<House> getHouseAverageScoreSortedCategory(List<Integer> categoryIds, Pageable pageable) {
+        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+        List<Integer> ids = houseScores.stream()
+                .map(HouseScoreAvg::getHouseId)
+                .collect(Collectors.toList());
+
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Page<House> result = houseRepository.findByCategoryIdsOrderByScore(categoryIds, ids, pageable);
+
+        // 並び替えをJava codeで行う
+        List<House> sortedHouses = result.stream()
+                                         .sorted(Comparator.comparingInt(h -> ids.indexOf(h.getId())))
+                                         .collect(Collectors.toList());
+
+        return new PageImpl<>(sortedHouses, pageable, result.getTotalElements());
+    }
+    
+    
+    
+//  店舗情報を全て取得
+    public List<House> getAllHouses() {
+        return houseRepository.findAll();
+    }
+    
+    
+    public List<House> getTop5Houses() {
+    	
+        List<House> houses = houseRepository.findAllWithCategoriesOrderedByCreatedAtDesc();
+        
+        return houses.stream().limit(5).collect(Collectors.toList());
+    }
+    
+
     
 }

@@ -21,17 +21,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.form.CategoryEditForm;
 import com.example.nagoyameshi.form.CategoryRegisterForm;
-import com.example.nagoyameshi.repository.CategoryReository;
+import com.example.nagoyameshi.repository.CategoryRepository;
 import com.example.nagoyameshi.service.CategoryService;
 
 @Controller
 @RequestMapping("/admin/categories")
 public class CategoryController {
-	private final CategoryReository categoryRepository;
+	private final CategoryRepository categoryRepository;
 	private final CategoryService categoryService;
   
     
-	public CategoryController (CategoryReository categoryRepository, CategoryService categoryService) {
+	public CategoryController (CategoryRepository categoryRepository, CategoryService categoryService) {
 		this.categoryRepository = categoryRepository;
 		this.categoryService = categoryService;
 	}
@@ -60,7 +60,7 @@ public class CategoryController {
 
     }
 	
-//	 ＜店舗情報登録➀＞	
+//	 ＜カテゴリー情報登録➀＞	
 //	 まず、ビューにフォームクラスのインスタンスを渡す
 	 @GetMapping("/register")
     public String register(Model model) {
@@ -68,7 +68,7 @@ public class CategoryController {
         return "admin/categories/register";
     }   
 	 
-//	 ＜店舗情報登録➁＞
+//	 ＜カテゴリー情報登録➁＞
 	 @PostMapping("/create")
 //	 メソッドの引数に@ModelAttributeアノテーションをつけ、フォームから送信されたデータ（フォームクラスのインスタンス）をその引数にバインド（割り当て）できる
     public String create(@ModelAttribute @Validated CategoryRegisterForm categoryRegisterForm,
@@ -87,7 +87,7 @@ public class CategoryController {
 	 }
 	 
 
-//	 ＜店舗情報編集➀：元情報をビューに渡すSTEP＞
+//	 ＜カテゴリー情報編集➀：元情報をビューに渡すSTEP＞
 	 @GetMapping("/{id}/edit")
      public String edit(@PathVariable(name = "id") Integer id, Model model) {
 //		 該当するidの情報をcategoryテーブルから取得する
@@ -112,7 +112,7 @@ public class CategoryController {
         return "admin/categories/edit";
      }    
 	 
-//	 ＜店舗情報編集➁：元情報をビューに渡すSTEP＞
+//	 ＜カテゴリー情報編集➁：元情報をビューに渡すSTEP＞
 	 @PostMapping("/{id}/update")
      public String update(@ModelAttribute @Validated CategoryEditForm categoryEditForm,
     		 			  BindingResult bindingResult,
