@@ -1,4 +1,4 @@
-<!--新規会員登録画面-->
+<!--管理者新規登録画面-->
 
 <!DOCTYPE html>
  <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -7,14 +7,14 @@
               
          <div th:replace="~{fragment :: styles}"></div> 
          
-         <title>会員登録</title>       
+         <title>管理者登録</title>       
      </head>
      <body>
          <div class="samuraitravel-wrapper">
              <!-- ヘッダー -->
              <div th:replace="~{fragment :: header}"></div>
              
-             <div class="container pt-4 pb-3 samuraitravel-container">
+             <div class="container samuraitravel-container">
 	             <div class="row justify-content-center">
 		             <div class="col-xl-6 col-lg-7 col-md-9">  
 <!--			         成功メッセージ-->
@@ -31,13 +31,21 @@
              
              
              <main>
-                 <div class="container pt-4 pb-5 samuraitravel-container">
+                 <div class="container pb-5 samuraitravel-container">
                      <div class="row justify-content-center">
-                         <div class="col-xl-6 col-lg-6 col-md-8">  
+                         <div class="col-xl-5 col-lg-6 col-md-8">  
+							 
+<!--						 パンくずリスト-->
+							 <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                                 <ol class="breadcrumb mb-0"> 
+                                     <li class="breadcrumb-item"><a th:href="@{/admin/administrator/list}">管理者一覧</a></li>
+                                     <li class="breadcrumb-item active" aria-current="page">管理者登録</li>
+                                 </ol>
+                             </nav> 
 
-                             <h1 class="mb-4 text-center">会員登録</h1>  
+                             <h1 class="mb-4 text-center">管理者登録</h1>  
                              
-                             <form method="post" th:action="@{/signup}" th:object="${signupForm}">
+                             <form method="post" th:action="@{/admin/administrator/register}" th:object="${adminUserRegisterForm}">
      
                                  <div class="form-group row mb-3">
                                      <div class="col-md-5">
@@ -189,34 +197,16 @@
                                      </div>
                                  </div>
                                  
-<!--                             有料会員になるかどうかの選択-->
-                                 <div class="form-group row mb-3">
-                                     <div class="col-md-5">
-                                         <label for="subscribe" class="col-form-label text-md-left fw-bold">
-                                             <div class="d-flex align-items-center">
-                                                 <span class="me-1">会員タイプ</span>
-                                                 <span class="badge bg-danger">必須</span>
-                                             </div>
-                                         </label>
-                                     </div>
-                                     
-                                     <div class="col-md-7">
-										 <div th:if="${#fields.hasErrors('subscribe')}" class="text-danger small mb-2" th:errors="*{subscribe}"></div>
-											 <input type="radio" th:field="*{subscribe}" value="2" id="subscribeYes"> <label for="subscribeYes">はい</label>
-									         <input type="radio" th:field="*{subscribe}" value="1" id="administrator"> <label for="administrator">管理者</label>
-									         <input type="radio" th:field="*{subscribe}" value="2" id="subscribeYes"> <label for="subscribeYes">有料会員</label>
-									         <input type="radio" th:field="*{subscribe}" value="3" id="subscribeNo"> <label for="subscribeNo">無料会員</label>
-                                     </div>
-						    	 </div>
+<!--                             管理者なので、Formには"1"を送信する-->
+<!--								 <input type="hidden" th:field="*{subscribe}" th:value="1">-->
+								  <input type="hidden" name="subscribe" value="1">
+
                                  
                                  <div class="form-group d-flex justify-content-center my-4">
                                      <button type="submit" class="btn text-white shadow-sm w-50 samuraitravel-btn">登録</button>
                                  </div>
                              </form>
                              
-                             <div class="text-center">
-                                 <a th:href="@{/login}">ログイン</a>
-                             </div>
                          </div>
                      </div>
                  </div>           

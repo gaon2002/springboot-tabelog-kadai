@@ -3,6 +3,7 @@ package com.example.nagoyameshi.service;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -69,22 +70,24 @@ public class UserService {
         return userRepository.save(user);
     }
     
-//    ユーザー情報更新
+//  ユーザー情報更新
     @Transactional
     public void update(UserEditForm userEditForm) {
-        User user = userRepository.getReferenceById(userEditForm.getId());
+        Optional<User> optionalUser = userRepository.findById(userEditForm.getId());
         
-        Integer subscribe = userEditForm.getSubscribe();
-        Role role = null;
-        
-        if (subscribe != null) {
-            if (subscribe.equals(2)) {
-                role = roleRepository.findByName("ROLE_PAID");
-                
-            }if (subscribe.equals(3)) {
-                role = roleRepository.findByName("ROLE_FREE");
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            Integer subscribe = userEditForm.getSubscribe();
+            Role role = null;
+
+            if (subscribe != null) {
+                if (subscribe.equals(2)) {
+                    role = roleRepository.findByName("ROLE_PAID");
+                } else if (subscribe.equals(3)) {
+                    role = roleRepository.findByName("ROLE_FREE");
+                }
             }
-        }
         
         user.setName(userEditForm.getName());
         user.setFurigana(userEditForm.getFurigana());
@@ -96,9 +99,14 @@ public class UserService {
         user.setEmail(userEditForm.getEmail());
         user.setRole(role);
         user.setSubscribe(subscribe);
-//      メール認証が完了するまで、falseとする
         
         userRepository.save(user);
+        
+        } else {
+            // ユーザーが存在しない場合の処理
+            // 例：例外を投げる、エラーメッセージをログに出力するなど
+            throw new RuntimeException("User not found with id: " + userEditForm.getId());
+        }
     }    
     
     

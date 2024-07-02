@@ -25,6 +25,7 @@ import com.example.nagoyameshi.service.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
@@ -57,7 +58,7 @@ public class UserController {
 //  ユーザー情報の編集➀：フォームへ元情報をセットする
     @GetMapping("/edit")
     public String edit(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {        
-        User user = userRepository.getReferenceById(userDetailsImpl.getUser().getId());  
+    	User user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
         
 //      保存されているユーザー情報を編集フォームに入れ込むため、各フィールドの項目をインスタンス化
         UserEditForm userEditForm = new UserEditForm(user.getId(), user.getRole(), user.getName(), user.getFurigana(), user.getAge(), user.getBirthday(), user.getPostalCode(), user.getAddress(), user.getPhoneNumber(), user.getEmail(),user.getSubscribe());
@@ -92,7 +93,9 @@ public class UserController {
 //  サブスク料金の支払いのための情報を作り、ビューに渡してStripeに情報を渡しつつ、Stripeを起動
     @PostMapping("/create-checkout-session")
     public String createCheckoutSession(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
-    									 RedirectAttributes redirectAttributes) {
+    									 RedirectAttributes redirectAttributes,
+    									 HttpServletRequest httpServletRequest,
+    									 Model model) {
     	
     	System.out.println("createCheckoutSession method called"); //　【後で消す】メソッドが呼び出されているか
     	
@@ -101,21 +104,22 @@ public class UserController {
     	System.out.println(user);	//【後で消す】userの中身確認
     	
         try {
-//        	stripeServiceの決済セッション(createCheckoutSession())を実行のためのuser情報を渡す。
-            String sessionId = stripeService.createCheckoutSession(user);
+//        	stripeServiceの決済セッション(createCheckoutSession())を実行のためのuser情報(付随データ)を渡す。
+            String sessionId = stripeService.createCheckoutSession(user, httpServletRequest);
             
             System.out.println("Generated Session ID: " + sessionId); // 【後で消す】デバッグ用ログ
             
             // フロントエンドにセッションIDを渡す
-            redirectAttributes.addFlashAttribute("sessionId", sessionId);
-            return "redirect:/user/verify";
+            model.addAttribute("sessionId", sessionId);
+            
+            return "auth/verify";
 
             
             
         } catch (StripeException e) {
             // エラーハンドリング
-        	redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/user/error";
+        	model.addAttribute("errorMessage", e.getMessage());
+            return "auth/verify";
         }
     }
     

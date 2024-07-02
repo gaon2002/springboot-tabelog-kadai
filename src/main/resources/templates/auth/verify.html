@@ -51,9 +51,10 @@
 <!--							確認用-->
 							
 <!--：支払い機能が追加出来たらコメントアウトを削除する							<div sec:authorize="hasRole('ROLE_PAID')">-->
-								 <form th:action="@{/user/create-checkout-session}" method="post" >
-                                    <button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">月額料金決済手続き</button>
-                                </form>
+								 <form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
+                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">月額料金決済手続き</button>
+                        		 </form>
+                        		 
 									
 <!--：支払い機能が追加出来たらコメントアウトを削除する								</div>-->
 							

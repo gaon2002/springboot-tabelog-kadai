@@ -16,13 +16,17 @@ import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerUpdateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Service
 public class StripeService {
 	
 	    private final UserRepository userRepository;    
+	    private final HttpServletRequest httpServletRequest; 
 
-	    public StripeService(UserRepository userRepository) {
+	    public StripeService(UserRepository userRepository, HttpServletRequest httpServletRequest) {
 	        this.userRepository = userRepository; 
+	        this.httpServletRequest = httpServletRequest;
 	    }
 
 	    // Spring FrameworkやSpring BootなどのJavaベースのフレームワークで使用されるアノテーション
@@ -33,13 +37,14 @@ public class StripeService {
 		@Value("${stripe.api-key}")
 		// stripeApiKeyフィールドに外部の構成から取得されたAPIキーを注入する
 		private String stripeApiKey;
+
 		
      // セッションを作成し、Stripeに必要な情報を返す
-     public String createCheckoutSession(User user) throws StripeException{
+     public String createCheckoutSession(User user, HttpServletRequest httpServletRequest) throws StripeException{
 //    	 APIのシークレットキーを記述
     	 Stripe.apiKey = stripeApiKey;
 //       リクエストのURLを取得
-//         String requestUrl = new String(httpServletRequest.getRequestURL());
+ 		 String requestUrl = new String(httpServletRequest.getRequestURL());
     	 
     	 // 顧客作成のパラメーターを構築
     	 CustomerCreateParams customerParams = 
@@ -68,17 +73,19 @@ public class StripeService {
                          .setPrice("price_1PR7FQRuhzAsDRtmL2QSoXi7")
                          .build())
                  
-//               セッションモードを購読（Subscription）に設定
+//               支払モードを購読（Subscription）に設定
                  .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                  
 //               支払成功時のリダイレクトURL
-                 .setSuccessUrl("http://localhost:8080/success?session_id={CHECKOUT_SESSION_ID}")
+                 .setSuccessUrl(requestUrl.replace("/signup", "") + "/success")
 //               支払いキャンセル時のリダイレクトURL
-                 .setCancelUrl("http://localhost:8080/cancel")
+                 .setCancelUrl(requestUrl.replace("/signup", "") + "/cancel")
+
                  
                  .build();
+         
          try {
-//        	 Stripe APIを呼び出してセッションを作成
+//        	 Stripe APIを呼び出してセッションIDを作成
              Session session = Session.create(params);
 //           成功時には作成されたセッションのIDを返す
              

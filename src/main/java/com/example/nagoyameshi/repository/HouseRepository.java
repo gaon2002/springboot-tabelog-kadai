@@ -123,4 +123,6 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
         @Param("ids") List<Integer> ids,
         Pageable pageable);
     
+	@Query("SELECT r.house.id FROM Review r GROUP BY r.house.id ORDER BY AVG(r.score) DESC")
+	public List<Integer> findHouseIdsOrderedByAverageScore();
 }

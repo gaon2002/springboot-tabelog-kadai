@@ -212,27 +212,29 @@ public class HouseService {
         return reviewRepository.findHouseAverageScoresSortedOrderedByScore();
     }
 
-//  キーワード検索後に並べ替えするメソッド
+//  キーワード検索後に人気の高い順に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSorted(String keyword, String address, Pageable pageable) {
     	// 1. Houseエンティティのリストを平均スコアでソート(ReviewRepositoryのメソッド呼び出し)して取得
-        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
-//      ・houseScoresリストからHouseのIDのみを抽出し、新しいリストidsに格納
-//        -houseScores.stream()：houseScoresリストをストリームに変換。
-//        	※ストリームは、データのシーケンス（順序のある一連の要素）を処理するための抽象化であり、様々な操作（フィルタリング、マッピング、ソートなど）をサポート。
-        List<Integer> ids = houseScores.stream()
-//        		・ストリームの各要素（HouseScoreAvgオブジェクト）に対してgetHouseIdメソッドを適用し、新しいストリームを生成。
-//        		 -mapメソッド：元のストリームの各要素に対して関数を適用し、その結果を新しいストリームとして返す。
-//        		  この新しいストリームは、元のHouseScoreAvgオブジェクトの代わりにhouseId（Integer型のID）を含む。
-//        		  (HouseScoreAvg::getHouseId)：HouseScoreAvgクラスのインスタンスメソッドgetHouseIdを参照
-                .map(HouseScoreAvg::getHouseId)
-//              ・map()で作成された新しいストリームの要素をListに変換し、リストに収集する。
-//                ※collectメソッド：ストリームの終端操作で、ストリームの要素を指定されたコレクタ（この場合はリスト）に収集される
-                .collect(Collectors.toList());
-
-        // 2. IDリストが空の場合、空のページを返す
-        if (ids.isEmpty()) {
-            return Page.empty(pageable);
-        }
+    	List<Integer> ids = houseRepository.findHouseIdsOrderedByAverageScore();
+    	
+//        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+////      ・houseScoresリストからHouseのIDのみを抽出し、新しいリストidsに格納
+////        -houseScores.stream()：houseScoresリストをストリームに変換。
+////        	※ストリームは、データのシーケンス（順序のある一連の要素）を処理するための抽象化であり、様々な操作（フィルタリング、マッピング、ソートなど）をサポート。
+//        List<Integer> ids = houseScores.stream()
+////        		・ストリームの各要素（HouseScoreAvgオブジェクト）に対してgetHouseIdメソッドを適用し、新しいストリームを生成。
+////        		 -mapメソッド：元のストリームの各要素に対して関数を適用し、その結果を新しいストリームとして返す。
+////        		  この新しいストリームは、元のHouseScoreAvgオブジェクトの代わりにhouseId（Integer型のID）を含む。
+////        		  (HouseScoreAvg::getHouseId)：HouseScoreAvgクラスのインスタンスメソッドgetHouseIdを参照
+//                .map(HouseScoreAvg::getHouseId)
+////              ・map()で作成された新しいストリームの要素をListに変換し、リストに収集する。
+////                ※collectメソッド：ストリームの終端操作で、ストリームの要素を指定されたコレクタ（この場合はリスト）に収集される
+//                .collect(Collectors.toList());
+//
+//        // 2. IDリストが空の場合、空のページを返す
+//        if (ids.isEmpty()) {
+//            return Page.empty(pageable);
+//        }
 
      // 3. キーワードと住所に基づいてフィルタリングし、ページングされた結果を取得
         Page<House> result = houseRepository.findByNameLikeOrAddressLikeAndIdIn(
@@ -254,14 +256,17 @@ public class HouseService {
     
 //  全てを表示後に人気の高い順に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSortedAll(Pageable pageable) {
-        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
-        List<Integer> ids = houseScores.stream()
-                .map(HouseScoreAvg::getHouseId)
-                .collect(Collectors.toList());
-
-        if (ids.isEmpty()) {
-            return Page.empty(pageable);
-        }
+    	
+    	List<Integer> ids = houseRepository.findHouseIdsOrderedByAverageScore();
+    	
+//        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+//        List<Integer> ids = houseScores.stream()
+//                .map(HouseScoreAvg::getHouseId)
+//                .collect(Collectors.toList());
+//
+//        if (ids.isEmpty()) {
+//            return Page.empty(pageable);
+//        }
 
         Page<House> result = houseRepository.findAllByIdsIn(ids, pageable);
 
@@ -275,14 +280,17 @@ public class HouseService {
     
 //  利用金額(上限下限両方入る場合)から検索表示後に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSortedGreaterAndLess(Integer priceMax, Integer priceMin, Pageable pageable) {
-        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
-        List<Integer> ids = houseScores.stream()
-                .map(HouseScoreAvg::getHouseId)
-                .collect(Collectors.toList());
-
-        if (ids.isEmpty()) {
-            return Page.empty(pageable);
-        }
+    	
+    	List<Integer> ids = houseRepository.findHouseIdsOrderedByAverageScore();
+    	
+//        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+//        List<Integer> ids = houseScores.stream()
+//                .map(HouseScoreAvg::getHouseId)
+//                .collect(Collectors.toList());
+//
+//        if (ids.isEmpty()) {
+//            return Page.empty(pageable);
+//        }
 
         Page<House> result = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqual(priceMax, priceMin, ids, pageable);
 
@@ -296,14 +304,17 @@ public class HouseService {
 
 //  利用金額(下限が入る場合)から検索表示後に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSortedGreater(Integer priceMin, Pageable pageable) {
-        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
-        List<Integer> ids = houseScores.stream()
-                .map(HouseScoreAvg::getHouseId)
-                .collect(Collectors.toList());
-
-        if (ids.isEmpty()) {
-            return Page.empty(pageable);
-        }
+    	
+    	List<Integer> ids = houseRepository.findHouseIdsOrderedByAverageScore();
+    	
+//        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+//        List<Integer> ids = houseScores.stream()
+//                .map(HouseScoreAvg::getHouseId)
+//                .collect(Collectors.toList());
+//
+//        if (ids.isEmpty()) {
+//            return Page.empty(pageable);
+//        }
 
         Page<House> result = houseRepository.findByPriceMinGreaterThanEqual(priceMin, ids, pageable);
 
@@ -317,14 +328,17 @@ public class HouseService {
     
 //  利用金額(上限両方入る場合)から検索表示後に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSortedLess(Integer priceMax, Pageable pageable) {
-        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
-        List<Integer> ids = houseScores.stream()
-                .map(HouseScoreAvg::getHouseId)
-                .collect(Collectors.toList());
-
-        if (ids.isEmpty()) {
-            return Page.empty(pageable);
-        }
+    	
+    	List<Integer> ids = houseRepository.findHouseIdsOrderedByAverageScore();
+    	
+//        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+//        List<Integer> ids = houseScores.stream()
+//                .map(HouseScoreAvg::getHouseId)
+//                .collect(Collectors.toList());
+//
+//        if (ids.isEmpty()) {
+//            return Page.empty(pageable);
+//        }
 
         Page<House> result = houseRepository.findByPriceMaxLessThanEqual(priceMax, ids, pageable);
 
@@ -339,14 +353,17 @@ public class HouseService {
     
 //  カテゴリー検索表示後に並べ替えするメソッド
     public Page<House> getHouseAverageScoreSortedCategory(List<Integer> categoryIds, Pageable pageable) {
-        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
-        List<Integer> ids = houseScores.stream()
-                .map(HouseScoreAvg::getHouseId)
-                .collect(Collectors.toList());
-
-        if (ids.isEmpty()) {
-            return Page.empty(pageable);
-        }
+    	
+    	List<Integer> ids = houseRepository.findHouseIdsOrderedByAverageScore();
+    	
+//        List<HouseScoreAvg> houseScores = getHousesOrderedByAverageScoreSorted();
+//        List<Integer> ids = houseScores.stream()
+//                .map(HouseScoreAvg::getHouseId)
+//                .collect(Collectors.toList());
+//
+//        if (ids.isEmpty()) {
+//            return Page.empty(pageable);
+//        }
 
         Page<House> result = houseRepository.findByCategoryIdsOrderByScore(categoryIds, ids, pageable);
 

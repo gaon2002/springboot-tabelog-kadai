@@ -2,6 +2,15 @@ package com.example.nagoyameshi.controller;
 //認証機能（ログイン、会員登録）用のコントローラ
 
 
+import java.util.Collection;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +26,7 @@ import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.entity.VerificationToken;
 import com.example.nagoyameshi.event.SignupEventPublisher;
 import com.example.nagoyameshi.form.SignupForm;
+import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.UserService;
 import com.example.nagoyameshi.service.VerificationTokenService;
 
@@ -52,12 +62,14 @@ public class AuthController {
         return "auth/login";
     }
     
+//  ユーザー新規登録➀：ユーザー登録フォームをビューに送信
     @GetMapping("/signup")
     public String signup(Model model) {        
         model.addAttribute("signupForm", new SignupForm());
         return "auth/signup";
     }    
     
+//  ユーザー新規登録➁：ユーザー登録フォームから情報を受け取りテーブルに保管
     @PostMapping("/signup")
 //    引数でHttpServletRequestオブジェクトを受け取る
     public String signup(@ModelAttribute @Validated SignupForm signupForm,
@@ -82,9 +94,6 @@ public class AuthController {
             return "auth/signup";
         }
         
-//        userService.create(signupForm);
-//        redirectAttributes.addFlashAttribute("successMessage", "会員登録が完了しました。");
-        
         User createdUser = userService.create(signupForm);
 //      EventPublisherに渡すURLを取得：イベントを発生させるビューページのURLを取得
         String requestUrl = new String(httpServletRequest.getRequestURL());
@@ -95,6 +104,7 @@ public class AuthController {
 
         return "auth/signup"; 
     }    
+    
     
 //  メール認証用URL（/signup/verify）を受け取りUrl内のtokenと、verificationToken内のtokenが一致するかを確認し、ユーザーを有効化する
     @GetMapping("/signup/verify")
@@ -112,7 +122,7 @@ public class AuthController {
             userService.enableUser(user);
             
 //			ユーザーの自動ログイン
-//            authenticateUser(user, session);
+            authenticateUser(user, session);
             
             String successMessage = "会員登録が完了しました。";
             model.addAttribute("successMessage", successMessage);            
@@ -128,7 +138,7 @@ public class AuthController {
         
 
 
-////  メール認証後ログイン状態にしておくためのメソッド
+////  【長尾作成】メール認証後ログイン状態にしておくためのメソッド
 //    private void authenticateUser(User user) {
 //    	Collection<GrantedAuthority> authorities = user.getRoles();  // userからroles/authoritiesを取得
 //    	
@@ -137,27 +147,26 @@ public class AuthController {
 //    	
 //    	Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 ////    	セッションスコープにログイン情報が設定される
-//    	SecurityContextHolder.getContext().setAuthentication(auth);
-//        
+//    	SeurityContextHolder.getContext().setAuthentication(auth);
+//       
 //    }
-//    
-	//  メール認証後ログイン状態にしておくためのメソッド
  
-    
-//    【暫定処置】
+
+//  メール認証後ログイン状態にしておくためのメソッド（長尾作成）
+ 
 //    SecurityContextHolderにてセッションスコープへログイン情報がセットされる部分を
 //    強制的にセッションスコープへ設定するようにいたしました。
     
-//	private void authenticateUser(User user, HttpSession session) {
-//		Collection<GrantedAuthority> authorities = user.getRoles(); // userからroles/authoritiesを取得
-//		UserDetails userDetails = new UserDetailsImpl(user, authorities); // authoritiesも渡す
-//		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-//		
-//		SecurityContextHolder.getContext().setAuthentication(auth);
-//		// SecurityContextに認証情報をセット
-//		SecurityContext context = SecurityContextHolder.getContext();
-//		context.setAuthentication(auth);
-//		// セッションにSecurityContextをセット
-//		session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
-//	}
+	private void authenticateUser(User user, HttpSession session) {
+		Collection<GrantedAuthority> authorities = user.getRoles(); // userからroles/authoritiesを取得
+		UserDetails userDetails = new UserDetailsImpl(user, authorities); // authoritiesも渡す
+		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		
+		SecurityContextHolder.getContext().setAuthentication(auth);
+		// SecurityContextに認証情報をセット
+		SecurityContext context = SecurityContextHolder.getContext();
+		context.setAuthentication(auth);
+		// セッションにSecurityContextをセット
+		session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+	}
 }

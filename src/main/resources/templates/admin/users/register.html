@@ -194,7 +194,7 @@
                                      <div class="col-md-5">
                                          <label for="subscribe" class="col-form-label text-md-left fw-bold">
                                              <div class="d-flex align-items-center">
-                                                 <span class="me-1">会員タイプ</span>
+                                                 <span class="me-1">有料会員になりますか？</span>
                                                  <span class="badge bg-danger">必須</span>
                                              </div>
                                          </label>
@@ -202,10 +202,8 @@
                                      
                                      <div class="col-md-7">
 										 <div th:if="${#fields.hasErrors('subscribe')}" class="text-danger small mb-2" th:errors="*{subscribe}"></div>
-											 <input type="radio" th:field="*{subscribe}" value="2" id="subscribeYes"> <label for="subscribeYes">はい</label>
-									         <input type="radio" th:field="*{subscribe}" value="1" id="administrator"> <label for="administrator">管理者</label>
-									         <input type="radio" th:field="*{subscribe}" value="2" id="subscribeYes"> <label for="subscribeYes">有料会員</label>
-									         <input type="radio" th:field="*{subscribe}" value="3" id="subscribeNo"> <label for="subscribeNo">無料会員</label>
+									         <input type="radio" th:field="*{subscribe}" value="2" id="subscribeYes"> <label for="subscribeYes">はい</label>
+									         <input type="radio" th:field="*{subscribe}" value="3" id="subscribeNo"> <label for="subscribeNo">いいえ</label>
                                      </div>
 						    	 </div>
                                  

@@ -115,12 +115,14 @@
 								<div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownAdmin">
 <!--								■メニューのドロップダウン表示-->
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/users}">会員一覧（管理者用）</a>  
-									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/houses}">民宿一覧（管理者用）</a>
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/administrator/list}">管理者一覧（管理者用）</a>
+									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/houses}">店舗一覧（管理者用）</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/reviews}">レビュー一覧（管理者用）</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/admin/categories}">カテゴリー一覧</a>
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/user/UserPasswordChange}">パスワード変更</a>
 									
 									<div class="dropdown-diviver"></div>
+									
 									<a class="dropdown-item samuraitravel-dropdown-item" th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
 										ログアウト
 									</a>

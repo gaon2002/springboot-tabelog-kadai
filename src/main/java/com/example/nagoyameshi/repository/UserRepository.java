@@ -23,5 +23,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 //	レビュー一覧の店舗検索に使用（ReviewService）
     public List<User> findByEmailContaining(String email);
+    
+    
+//	ROLEがADMINのデータを抜き出す
+	public List<User> findByRoleId(int i);
 
 }

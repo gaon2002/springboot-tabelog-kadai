@@ -1,4 +1,4 @@
-<!--会員情報一覧（管理者用）-->
+<!--管理者一覧（管理者用）-->
 
  <!DOCTYPE html>
  <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
@@ -7,7 +7,7 @@
               
          <div th:replace="~{fragment :: styles}"></div>
            
-         <title>会員一覧</title>   
+         <title>管理者一覧</title>   
      </head>
      <body>
          <div class="samuraitravel-wrapper">
@@ -19,17 +19,8 @@
                      <div class="row justify-content-center">
                          <div class="col-xxl-9 col-xl-10 col-lg-11">
                              
-                             <h1 class="mb-4 text-center">会員一覧</h1>   
+                             <h1 class="mb-4 text-center">管理者一覧</h1>   
                              
-                             <div class="d-flex justify-content-between align-items-end">
-                                 <form method="get" th:action="@{/admin/users}" class="mb-3">
-                                     <div class="input-group">
-                                         <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="氏名・フリガナ">
-                                         <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button> 
-                                     </div>               
-                                 </form>                                                                                                
-                             </div>                                                         
-                 
                              <div th:if="${successMessage}" class="alert alert-info">
                                  <span th:text="${successMessage}"></span>
                              </div>   
@@ -37,6 +28,8 @@
                              <div th:if="${errorMessage}" class="alert alert-danger">
                                  <span th:text="${errorMessage}"></span>
                              </div>   
+                             
+                             <a th:href="@{/admin/administrator/register}" class="btn text-white shadow-sm mb-3 samuraitravel-btn  float-end">登録</a>  
                              
                              <table class="table">
                                  <thead>
@@ -47,10 +40,11 @@
                                          <th scope="col">フリガナ</th>
                                          <th scope="col">メールアドレス</th>                                        
                                          <th scope="col"></th>
+                                         <th scope="col"></th>
                                      </tr>
                                  </thead>   
                                  <tbody>                                                     
-                                     <tr th:each="user : ${userPage}">
+                                     <tr th:each="user : ${adminUsers}">
                                          <td th:text="${user.getId()}"></td>
                                          
                                          <td th:switch="${user.getRole().getId()}">
@@ -62,35 +56,36 @@
                                          <td th:text="${user.getName()}"></td>
                                          <td th:text="${user.getFurigana()}"></td>
                                          <td th:text="${user.getEmail()}"></td>
-                                         <td><a th:href="@{/admin/users/__${user.getId()}__}">詳細</a></td>
+                                         <td><a th:href="@{/admin/administrator/detail/__${user.getId()}__}">詳細</a></td>        
                                          
-             
+<!--                                    データ削除：data-bs-toggle属性、data-bs-target属性：Bootstrapでモーダルウィンドウなどを作成するときの作法   -->
+                                        <td><a href="#" class="samuraitravel-link-danger" data-bs-toggle="modal" th:data-bs-target="${'#deleteAdminModal' + user.getId()}">削除</a></td>     
+
+                                        <!-- 削除用モーダル -->
+                                        <div class="modal fade" th:id="${'deleteAdminModal' + user.getId()}" tabindex="-1" th:aria-labelledby="${'deleteAdminModalLabel' + user.getId()}">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+<!--													data-bs-target属性やid属性などの先頭にth:をつけることで、その値に変数を使うことができる（Thymeleafの機能）-->
+                                                        <h5 class="modal-title" th:id="${'deleteAdminModalLabel' + user.getId()}" th:text="${user.getName() + 'を削除してもよろしいですか？'}"></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+                                                    </div>
+                                                    <div class="modal-footer">
+<!--													deleteする店舗のidを送信-->
+                                                        <form method="post"th:action="@{/admin/administrator/__${user.getId()}__/delete}">
+                                                            <button type="submit" class="btn samuraitravel-btn-danger text-white shadow-sm">削除</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>    
                                          
-                                         
-                                                                                                                      
+                                                                                                                 
                                      </tr>                                      
                                  </tbody>
                              </table>  
                              
-                             <!-- ページネーション -->
-                             <div th:if="${userPage.getTotalPages() > 1}" class="d-flex justify-content-center">
-                                 <nav aria-label="会員一覧ページ">
-                                     <ul class="pagination">
-                                         <li class="page-item">
-                                             <span th:if="${userPage.isFirst()}" class="page-link disabled">前</span>
-                                             <a th:unless="${userPage.isFirst()}" th:href="@{/admin/users(page = ${userPage.getNumber() - 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">前</a>
-                                         </li>
-                                         <li th:each="i : ${#numbers.sequence(0, userPage.getTotalPages() - 1)}" class="page-item">
-                                             <span th:if="${i == userPage.getNumber()}" class="page-link active samuraitravel-active" th:text="${i + 1}"></span>
-                                             <a th:unless="${i == userPage.getNumber()}" th:href="@{/admin/users(page = ${i}, keyword = ${keyword})}" class="page-link samuraitravel-page-link" th:text="${i + 1}"></a>
-                                         </li>
-                                         <li class="page-item">                        
-                                             <span th:if="${userPage.isLast()}" class="page-link disabled">次</span>
-                                             <a th:unless="${userPage.isLast()}" th:href="@{/admin/users(page = ${userPage.getNumber() + 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">次</a>
-                                         </li>
-                                     </ul>
-                                 </nav> 
-                             </div>                                      
+                             
                          </div>
                      </div>
                  </div>
