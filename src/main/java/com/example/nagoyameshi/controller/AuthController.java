@@ -110,7 +110,6 @@ public class AuthController {
     @GetMapping("/signup/verify")
     
     public String verify(@RequestParam(name = "token") String token, Model model, HttpSession session) {
-    	System.out.println(token); //
 //    	URLに記載しているtokenをもとに、verificationToken内のtoken文字列を取得
         VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
         

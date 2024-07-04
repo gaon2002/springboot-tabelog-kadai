@@ -1,5 +1,6 @@
 package com.example.nagoyameshi.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.nagoyameshi.entity.Role;
 import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.form.UserEditForm;
 import com.example.nagoyameshi.form.UserPasswordChangeForm;
+import com.example.nagoyameshi.repository.RoleRepository;
 import com.example.nagoyameshi.repository.UserRepository;
 import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.StripeService;
@@ -26,6 +29,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
@@ -33,17 +37,19 @@ import jakarta.validation.Valid;
 @RequestMapping("/user")
 public class UserController {
     private final UserRepository userRepository;    
+    private final RoleRepository roleRepository;
     private final UserService userService; 
     private final StripeService stripeService;
     
-    public UserController(UserRepository userRepository, UserService userService, StripeService stripeService) {
+    public UserController(UserRepository userRepository, UserService userService, StripeService stripeService, RoleRepository roleRepository) {
         this.userRepository = userRepository; 
         this.userService = userService; 
         this.stripeService = stripeService;
+        this.roleRepository = roleRepository;
     }
          
 //  ユーザー情報の確認
-    @GetMapping
+    @GetMapping("/index")
     @Transactional
     public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
 //    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
@@ -95,30 +101,27 @@ public class UserController {
     public String createCheckoutSession(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
     									 RedirectAttributes redirectAttributes,
     									 HttpServletRequest httpServletRequest,
+    									 HttpServletResponse response,
     									 Model model) {
-    	
-    	System.out.println("createCheckoutSession method called"); //　【後で消す】メソッドが呼び出されているか
     	
     	User user = userDetailsImpl.getUser();
     	
-    	System.out.println(user);	//【後で消す】userの中身確認
-    	
         try {
 //        	stripeServiceの決済セッション(createCheckoutSession())を実行のためのuser情報(付随データ)を渡す。
-            String sessionId = stripeService.createCheckoutSession(user, httpServletRequest);
+            String redirectUrl = stripeService.createCheckoutSession(user, httpServletRequest, response);
             
-            System.out.println("Generated Session ID: " + sessionId); // 【後で消す】デバッグ用ログ
+         // HttpServletResponseを使用してリダイレクトを実行
+            response.sendRedirect(redirectUrl);
             
-            // フロントエンドにセッションIDを渡す
-            model.addAttribute("sessionId", sessionId);
-            
-            return "auth/verify";
+            return null;
 
             
-            
         } catch (StripeException e) {
-            // エラーハンドリング
-        	model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+            return "auth/verify";
+            
+        } catch (IOException e) {
+            model.addAttribute("errorMessage", e.getMessage());
             return "auth/verify";
         }
     }
@@ -126,10 +129,11 @@ public class UserController {
 //  サブスク料金支払処理が成功した後の処理
     @GetMapping("/success")
 //  セッションIDから関連するサブスクリプション情報を取得
-    public String success(@RequestParam("session_id") String sessionId, Model model) {
+    public String success(@RequestParam("session_id") String sessionId, RedirectAttributes redirectAttributes, Model model) {
     	try {
 //	    	StripeのセッションIDを使って特定のセッションを取得します。
 	    	Session session = Session.retrieve(sessionId);
+	    	
 //  	  	取得したセッションから顧客IDを取得。
 	        String customerId = session.getCustomer();
 	        
@@ -140,7 +144,8 @@ public class UserController {
 	        
 	        userRepository.save(user);
 	        
-	        return "success";
+	        redirectAttributes.addFlashAttribute("successMessage", "支払処理が成功しました。");
+	        return "redirect:/houses";
         
         
     	}catch (StripeException e) {
@@ -148,6 +153,69 @@ public class UserController {
             return "error";
     	}
     }
+    
+    
+//	カード情報更新➀：このメソッドはユーザーが新しいカード情報を入力するフォームを表示
+    @GetMapping("/UserUpdatePayment")
+
+    public String updatePaymentMethodForm() {
+    System.out.println("支払情報更新スタート"); 	//【OK】スタートできている
+        return "user/UserUpdatePayment";
+    }
+
+//	カード情報更新➁：新しいカード情報を受け取り、Stripeに更新リクエストを送る
+    @PostMapping("/update-payment-method")
+    public String updatePaymentMethod(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
+    								  @RequestParam String paymentMethodId,
+    								  RedirectAttributes redirectAttributes, 
+    								  Model model) 
+    {
+    	User user = userDetailsImpl.getUser();
+        String customerId = user.getRememberToken();
+
+        try {
+            stripeService.updatePaymentMethod(customerId, paymentMethodId);
+            redirectAttributes.addFlashAttribute("successMessage", "支払情報が更新されました。");
+            return "redirect:/user";
+            
+        } catch (StripeException e) {
+        	model.addAttribute("errorMessage", "支払情報の更新に失敗しました。再試行してください。");
+            return "user/UserUpdatePayment";
+        }
+    }
+    
+    
+//  サブスク解除
+    @PostMapping("/cancel-subscription")
+    public String cancelSubscription(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+    								 RedirectAttributes redirectAttributes,
+    								 Model model)
+    {
+    	User user = userDetailsImpl.getUser();
+        String cuntomerId = user.getRememberToken();
+        Role role = roleRepository.findByName("ROLE_FREE");
+
+        try {
+//        	Stripeの解除メソッド呼び出し
+            stripeService.cancelSubscription(cuntomerId);
+            
+//          サブスク開始年月日をnullにする
+            user.setRole(role);
+            user.setSubscribe(3);
+            user.setSubscriptionStartDate(null);
+            user.setSubscriptionEndDate(null);
+            
+            userRepository.save(user);
+            
+            redirectAttributes.addFlashAttribute("successMessage", "支払情報が更新されました。");
+            return "redirect:/user";
+            
+        } catch (StripeException e) {
+            return "/UserUpdatePayment";
+        }
+    }
+    
+    
     
 //    パスワード変更➀：パスワード変更画面の表示
       @GetMapping("/UserPasswordChange")

@@ -58,35 +58,24 @@ public class WebSecurityConfig {
 					.logoutSuccessUrl("/?loggedOut")
 					.permitAll()
 			)
-//			.sessionManagement() // セッション管理の設定
-//            		.invalidSessionUrl("/session-timeout")
-//            		.maximumSessions(1)
-//            		.expiredUrl("/login?expired")
-//            		.and()
-//            		.sessionFixation().newSession()
+
 			
 			// ★CSRFトークンを返すパスはCSRF対策から除外
 			// 　・CSRF（クロス・サイト・リクエスト・フォージェリ）:サイバー攻撃の一種。この攻撃を受けると「ログイン済みユーザーになりすましたアプリやサービスの利用」「アプリやサービスのデータ漏洩（ろうえい）」といった重大な問題が発生
 			// 　・今回のように外部からPOST送信を受ける場合、そのままではCSRF対策のチェックによってアクセスが拒否されてしまうので、「/stripe/webhook」に対するPOST送信についてはCSRF対策のチェックを行わないように設定
 			.csrf(csrf -> csrf.ignoringRequestMatchers("/stripe/webhook"));
-
-
+		
+//			.headers(headers -> headers
+//	                .contentSecurityPolicy(csp -> csp
+//	                    .policyDirectives("default-src 'self'; connect-src 'self' https://api.stripe.com https://errors.stripe.com https://r.stripe.com https://ppm.stripe.com https://merchant-ui-api.stripe.com;")
+//	                )
+//	            );
 		
 		
 		return http.build();
 	}
 
 	
-
-	
-//	//ログイン保持ができたら追加する
-//	 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//	        auth.inMemoryAuthentication()
-//	                .withUser("user")
-//	                .password(passwordEncoder().encode("password"))
-//	                .roles("PAID");
-//	    }
-
 	
 	@Bean //@Beanアノテーションを付けることで、そのメソッドの戻り値をDIコンテナに格納できる
 	// メソッド：パスワードのハッシュアルゴリズムを設定する

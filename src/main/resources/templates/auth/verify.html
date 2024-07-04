@@ -74,17 +74,6 @@
         
         <div th:replace="~{fragment :: scripts}"></div>  
         
-<!--		決済手続き(Stripe)の処理を実行するライブラリを取得-->
-			<script src="https://js.stripe.com/v3"></script>
-<!--		Thymeleafのテンプレート側で受け取った変数sessionIdの値をJavaScriptコードに埋め込む処理-->
-        	<script th:inline="javascript">
-        		const sessionId = /*[[${sessionId}]]*/ "null";
-            	console.log('Embedded Session ID:', sessionId);
-        	</script>
-        	
-        	
-<!--        Stripe処理を実行するjsファイル-->
-         	<script th:src="@{/js/stripe.js}"></script>   
         
   </body>
 </html>
