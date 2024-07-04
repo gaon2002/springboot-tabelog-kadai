@@ -3,7 +3,11 @@ package com.example.nagoyameshi.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,6 +27,7 @@ import com.example.nagoyameshi.form.UserPasswordChangeForm;
 import com.example.nagoyameshi.repository.RoleRepository;
 import com.example.nagoyameshi.repository.UserRepository;
 import com.example.nagoyameshi.security.UserDetailsImpl;
+import com.example.nagoyameshi.security.UserDetailsServiceImpl;
 import com.example.nagoyameshi.service.StripeService;
 import com.example.nagoyameshi.service.UserService;
 import com.stripe.exception.StripeException;
@@ -40,16 +45,20 @@ public class UserController {
     private final RoleRepository roleRepository;
     private final UserService userService; 
     private final StripeService stripeService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
+
     
-    public UserController(UserRepository userRepository, UserService userService, StripeService stripeService, RoleRepository roleRepository) {
+    public UserController(UserRepository userRepository, UserService userService, StripeService stripeService, RoleRepository roleRepository, UserDetailsServiceImpl userDetailsServiceImpl) {
         this.userRepository = userRepository; 
         this.userService = userService; 
         this.stripeService = stripeService;
         this.roleRepository = roleRepository;
+        this.userDetailsServiceImpl = userDetailsServiceImpl;
+
     }
          
 //  ユーザー情報の確認
-    @GetMapping("/index")
+    @GetMapping
     @Transactional
     public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
 //    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
@@ -129,8 +138,14 @@ public class UserController {
 //  サブスク料金支払処理が成功した後の処理
     @GetMapping("/success")
 //  セッションIDから関連するサブスクリプション情報を取得
-    public String success(@RequestParam("session_id") String sessionId, RedirectAttributes redirectAttributes, Model model) {
+    @Transactional
+    public String success(@RequestParam("session_id") String sessionId, 
+    					  RedirectAttributes redirectAttributes, 
+    					  Model model)
+    {
     	try {
+    		Role role = roleRepository.findByName("ROLE_PAID");
+    		
 //	    	StripeのセッションIDを使って特定のセッションを取得します。
 	    	Session session = Session.retrieve(sessionId);
 	    	
@@ -139,10 +154,22 @@ public class UserController {
 	        
 	        User user = userRepository.findByRememberToken(customerId);
 	        
+	        if (user == null) {
+	            System.out.println("ユーザーが見つかりませんでした。customerId：" + customerId);
+	            redirectAttributes.addFlashAttribute("errorMessage", "ユーザーが見つかりませんでした。");
+	            return "redirect:/error";
+	        }
+	        
 	        user.setSubscriptionStartDate(LocalDate.now());
-	        user.setSubscriptionEndDate(LocalDate.now().plusMonths(1));
+//	        user.setSubscriptionEndDate(LocalDate.now().plusMonths(1));
+	        user.setSubscribe(2);
+	        user.setRole(role);
 	        
 	        userRepository.save(user);
+	        
+	        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
+	        Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+	        SecurityContextHolder.getContext().setAuthentication(auth);
 	        
 	        redirectAttributes.addFlashAttribute("successMessage", "支払処理が成功しました。");
 	        return "redirect:/houses";
@@ -186,32 +213,42 @@ public class UserController {
     
     
 //  サブスク解除
-    @PostMapping("/cancel-subscription")
+    @GetMapping("/cancel-subscription")
     public String cancelSubscription(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
     								 RedirectAttributes redirectAttributes,
     								 Model model)
     {
+    	
+    	System.out.println("支払情報解除スタート"); 
+    	
     	User user = userDetailsImpl.getUser();
-        String cuntomerId = user.getRememberToken();
+        String customerId = user.getRememberToken();
         Role role = roleRepository.findByName("ROLE_FREE");
-
+        
         try {
 //        	Stripeの解除メソッド呼び出し
-            stripeService.cancelSubscription(cuntomerId);
+            stripeService.cancelSubscription(customerId);
+            stripeService.deletePaymentMethods(customerId);
             
 //          サブスク開始年月日をnullにする
             user.setRole(role);
             user.setSubscribe(3);
+            user.setRememberToken(null);
             user.setSubscriptionStartDate(null);
-            user.setSubscriptionEndDate(null);
+            user.setSubscriptionEndDate(LocalDate.now());
             
             userRepository.save(user);
             
-            redirectAttributes.addFlashAttribute("successMessage", "支払情報が更新されました。");
+            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
+	        Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+	        SecurityContextHolder.getContext().setAuthentication(auth);
+            
+            redirectAttributes.addFlashAttribute("successMessage", "有料会員が解除されました。");
             return "redirect:/user";
             
         } catch (StripeException e) {
-            return "/UserUpdatePayment";
+        	redirectAttributes.addFlashAttribute("errorMessage", "エラーが発生しました。");
+            return "redirect:/user";
         }
     }
     

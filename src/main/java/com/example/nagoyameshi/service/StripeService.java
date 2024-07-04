@@ -10,12 +10,18 @@ import com.example.nagoyameshi.repository.UserRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.PaymentMethodCollection;
 import com.stripe.model.Subscription;
+import com.stripe.model.SubscriptionCollection;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerUpdateParams;
+import com.stripe.param.PaymentMethodListParams;
+import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -27,6 +33,13 @@ public class StripeService {
 	    public StripeService(UserRepository userRepository){
 	        this.userRepository = userRepository; 
 	        
+	    }
+	    
+//	    APIキーをStripe.apiKeyに設定する処理を、メソッド内に入れるのではなく、サービスクラスの初期化時に行うのが適切
+	    @PostConstruct
+	    public void init() {
+	        // StripeのAPIキーを設定
+	        Stripe.apiKey = stripeApiKey;
 	    }
 
 	    // Spring FrameworkやSpring BootなどのJavaベースのフレームワークで使用されるアノテーション
@@ -45,8 +58,6 @@ public class StripeService {
 		
      // セッションを作成し、Stripeに必要な情報を返す
      public String createCheckoutSession(User user, HttpServletRequest httpServletRequest, HttpServletResponse response) throws StripeException{
-//    	APIのシークレットキーを記述
-    	Stripe.apiKey = stripeApiKey;
     	
 //      リクエストのURLを取得(ビューのエンドポイントが表示される：Request URL: http://localhost:8080/user/create-checkout-session)
  		String requestUrl = new String(httpServletRequest.getRequestURL());
@@ -55,7 +66,6 @@ public class StripeService {
  		
  		// 顧客IDの検証
  	    String rememberToken = user.getRememberToken();
- 	    System.out.println("RememberToken: " + rememberToken);
  		
  		if (hasText(rememberToken)){
  			// 既存の顧客IDを使用
@@ -122,11 +132,63 @@ public class StripeService {
          return session.getUrl(); // リダイレクトURLを返す
      } 
      
-//   解約時のメソッド
-     public void cancelSubscription(String cuntomerId) throws StripeException {
-    	 Subscription subscription = Subscription.retrieve(cuntomerId);
-    	 	subscription.cancel();
+//	解約時のメソッド
+     public void cancelSubscription(String customerId) throws StripeException {
+         try {
+             // 顧客IDからサブスクリプションを取得
+             System.out.println("cancelSubscription()メソッドスタート");
+
+             SubscriptionCollection subscriptions = Subscription.list(
+                 SubscriptionListParams.builder()
+                     .setCustomer(customerId)
+                     .setStatus(SubscriptionListParams.Status.ACTIVE)
+                     .build()
+             );
+
+             if (subscriptions == null) {
+                 System.out.println("subscriptionsはnullです");
+                 throw new IllegalStateException("サブスクリプションが見つかりませんでした。");
+             }
+
+             if (subscriptions.getData().isEmpty()) {
+                 System.out.println("サブスクリプションが空です");
+                 throw new IllegalStateException("サブスクリプションが見つかりませんでした。");
+             }
+
+             // サブスクリプションの情報を出力
+             System.out.println("subscriptions：" + subscriptions);
+
+             // 1つの顧客に複数のサブスクリプションがある場合、適切なサブスクリプションを選択するロジックを追加
+             Subscription subscription = subscriptions.getData().get(0);
+
+             subscription.cancel();
+
+         } catch (StripeException e) {
+             System.out.println("StripeExceptionが発生しました：" + e.getMessage());
+             throw e;
+         } catch (Exception e) {
+             System.out.println("その他の例外が発生しました：" + e.getMessage());
+             throw new RuntimeException("サブスクリプションのキャンセル中にエラーが発生しました。", e);
+         }
      }
+     
+     
+//	支払い方法の削除メソッド
+     public void deletePaymentMethods(String customerId) throws StripeException {
+         // 顧客に関連するすべての支払い方法を取得
+         PaymentMethodListParams listParams = PaymentMethodListParams.builder()
+             .setCustomer(customerId)
+             .setType(PaymentMethodListParams.Type.CARD)
+             .build();
+
+         PaymentMethodCollection paymentMethods = PaymentMethod.list(listParams);
+
+         for (PaymentMethod paymentMethod : paymentMethods.getData()) {
+             // 各支払い方法を削除
+             paymentMethod.detach();
+         }
+     }
+     
      
 //   カード情報更新メソッド
      public void updatePaymentMethod(String customerId, String paymentMethodId) throws StripeException {

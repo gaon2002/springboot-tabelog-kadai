@@ -28,4 +28,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 //	ROLEがADMINのデータを抜き出す
 	public List<User> findByRoleId(int i);
 
+
 }

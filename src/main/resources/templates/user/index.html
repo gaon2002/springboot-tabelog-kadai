@@ -35,7 +35,11 @@
                             
                             <div th:if="${successMessage}" class="alert alert-info">
                                 <span th:text="${successMessage}"></span>
-                            </div>                               
+                            </div>           
+                            
+                            <div th:if="${errorMessage}" class="alert alert-danger">
+                                <span th:text="${errorMessage}"></span>
+                            </div>                            
                             
                             <div class="container mb-4">
                                 <div class="row pb-2 mb-2 border-bottom">
@@ -129,6 +133,12 @@
 									    </div>
 									 </div>
                                 </div>   
+                                
+								<div sec:authorize="hasRole('ROLE_FREE')">
+									<form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
+	                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">有料会員手続き</button>
+	                        		</form>
+                        		</div>
                                                                  
                             </div>                                                                                                                           
                         </div>
