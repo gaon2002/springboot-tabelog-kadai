@@ -1,113 +1,113 @@
 <!--レビュー一覧（管理者用）-->
 
- <!DOCTYPE html>
- <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
-     <head>
-         <div th:replace="~{fragment :: meta}"></div>   
-              
-         <div th:replace="~{fragment :: styles}"></div>
-           
-         <title>レビュー一覧</title>   
-     </head>
-     <body>
-         <div class="samuraitravel-wrapper">
-             <!-- ヘッダー -->
-             <div th:replace="~{fragment :: header}"></div>
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+    <head>
+        <div th:replace="~{fragment :: meta}"></div>   
              
-             <main>
-                 <div class="container pt-4 pb-5 samuraitravel-container">
-                     <div class="row justify-content-center">
-                         <div class="col-xxl-9 col-xl-10 col-lg-11">
-                             
-                             <h1 class="mb-4 text-center">レビューー覧（管理者用）</h1>   
-                             
+        <div th:replace="~{fragment :: styles}"></div>
+          
+        <title>レビュー一覧</title>   
+    </head>
+    <body>
+        <div class="samuraitravel-wrapper">
+            <!-- ヘッダー -->
+            <div th:replace="~{fragment :: header}"></div>
+            
+            <main>
+                <div class="container pt-4 pb-5 samuraitravel-container">
+                    <div class="row justify-content-center">
+                        <div class="col-xxl-9 col-xl-10 col-lg-11">
+                            
+                            <h1 class="mb-4 text-center">レビューー覧（管理者用）</h1>   
+                            
 <!--                         ■検索ボックス-->
-                             <div class="d-flex justify-content-between align-items-end">
-                                 <form method="get" th:action="@{/admin/reviews}" class="mb-3">
-                                     <div class="input-group">
-                                         <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="店舗名・ユーザーアドレス">
-                                         <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button> 
-                                     </div>               
-                                 </form>                                                                                                
-                             </div>        
-                             
-<!--                         ■処理エラーメッセージ-->
-                 			 <div th:if="${errorMessage}" class="alert alert-danger">
-   								 <span th:text="${errorMessage}"></span>
-							 </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <form method="get" th:action="@{/admin/reviews}" class="mb-3">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="店舗名・ユーザーアドレス">
+                                        <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button> 
+                                    </div>               
+                                </form>                                                                                                
+                            </div>        
+                            
+<!--                        ■処理エラーメッセージ-->
+               				<div th:if="${errorMessage}" class="alert alert-danger">
+								<span th:text="${errorMessage}"></span>
+						 	</div>
 <!--						 ■処理成功メッセージ-->
-                             <div th:if="${successMessage}" class="alert alert-info">
-                                 <span th:text="${successMessage}"></span>
-                             </div>   
-                             
-<!--                         ■一覧テーブル-->
-                             <table class="table">
-<!--							■テーブルヘッダー-->
-                                 <thead>
-                                     <tr>
+                          	<div th:if="${successMessage}" class="alert alert-info">
+                            	<span th:text="${successMessage}"></span>
+                          	</div>   
+                           
+<!--                        ■一覧テーブル-->
+                         	<table class="table">
+<!--						■テーブルヘッダー-->
+                                <thead>
+                                    <tr>
 										<th scope="col">ID</th>
-                                        <th scope="col">店舗名</th>
-                                        <th scope="col">会員名</th>
-                                        <th scope="col">評価</th>
-                                        <th scope="col">コメント</th>
-                                        <th scope="col">表示</th>
-                                     </tr>
-                                 </thead>   
+                                       <th scope="col">店舗名</th>
+                                       <th scope="col">会員名</th>
+                                       <th scope="col">評価</th>
+                                       <th scope="col">コメント</th>
+                                       <th scope="col">表示</th>
+                                    </tr>
+                                </thead>   
                                  
-<!--                             ■テーブル本体-->
-                                 <tbody>                                                     
+<!--                        ■テーブル本体-->
+                                <tbody>                                                     
 									<tr th:each="houseReview : ${houseReviews}">
-										
-									    <td th:text="${houseReview.getId()}">ID</td>
+									
+								    <td th:text="${houseReview.getId()}">ID</td>
 									    
-									    <td><a th:href="@{/houses/__${houseReview.getHouse().getId()}__}" th:text="${houseReview.getHouse().getName()}">House Name</a></td>
-									    
-									    <td th:text="${houseReview.getUser().getName()}">User Name</td>
-									    <td>
-									        <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseReview.getScore()} ? '&#9733;' : '&#9734;'"></span>
-									    </td>
-									    <td th:text="${houseReview.getComment()}">Comment</td>
-									    <td>
-<!--										■すでに非表示になっていたら-->
-									        <div th:if="${houseReview.getDisplay()} == 1">
-									            <p class="text-primary">非表示済</p>
-									        </div>
-<!--									    ■表示になっていたら-->
-									        <div th:if="${houseReview.getDisplay()} == 0">
-<!--											■非表示にするボタン-->
-									            <a href="#" class="samuraitravel-link-danger" data-bs-toggle="modal" th:attr="data-bs-target=${'#updateReservationModal' + houseReview.getId()}">非表示にする</a>
-<!--									        ■モーダル設定-->
-									            <div class="modal fade" th:id="${'updateReservationModal' + houseReview.getId()}" tabindex="-1" th:aria-labelledby="${'updateReservationModalLabel' + houseReview.getId()}">
-									                <div class="modal-dialog">
-									                    <div class="modal-content">
-									                        <div class="modal-header">
-									                            <h5 class="modal-title" th:id="${'updateReservationModalLabel' + houseReview.getId()}">非表示にしてもよろしいですか？</h5>
-									                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
-									                        </div>
-									                        <div class="modal-footer">
-									                            <form method="post" th:action="@{'/admin/reviews/' + ${houseReview.getId()} + '/update'}" th:object="${reviewInputForm}">
-																	
-									                                <input type="hidden" name="id" th:value="${houseReview.getId()}">
-									                                <input type="hidden" name="score" th:value="${houseReview.getScore()}">
-									                                <input type="hidden" name="comment" th:value="${houseReview.getComment()}">
-									                                <input type="hidden" name="display" th:value="1">
-									                                
-									                                <button type="submit" class="btn samuraitravel-btn-danger text-white shadow-sm">非表示にする</button>
-									                                
-																</form>
-									                        </div>
-									                    </div>
-									                </div>
-									            </div>
-									        </div>
-									    </td>
-									</tr>                                
-                                 </tbody>
+								    <td><a th:href="@{/houses/__${houseReview.getHouse().getId()}__}" th:text="${houseReview.getHouse().getName()}">House Name</a></td>
+								    
+								    <td th:text="${houseReview.getUser().getName()}">User Name</td>
+								    <td>
+								        <span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseReview.getScore()} ? '&#9733;' : '&#9734;'"></span>
+								    </td>
+								    <td th:text="${houseReview.getComment()}">Comment</td>
+								    <td>
+<!--									■すでに非表示になっていたら-->
+								        <div th:if="${houseReview.getDisplay()} == 1">
+								            <p class="text-primary">非表示済</p>
+								        </div>
+<!--								    ■表示になっていたら-->
+								        <div th:if="${houseReview.getDisplay()} == 0">
+<!--										■非表示にするボタン-->
+								            <a href="#" class="samuraitravel-link-danger" data-bs-toggle="modal" th:attr="data-bs-target=${'#updateReservationModal' + houseReview.getId()}">非表示にする</a>
+<!--								        ■モーダル設定-->
+								            <div class="modal fade" th:id="${'updateReservationModal' + houseReview.getId()}" tabindex="-1" th:aria-labelledby="${'updateReservationModalLabel' + houseReview.getId()}">
+								                <div class="modal-dialog">
+								                    <div class="modal-content">
+								                        <div class="modal-header">
+								                            <h5 class="modal-title" th:id="${'updateReservationModalLabel' + houseReview.getId()}">非表示にしてもよろしいですか？</h5>
+								                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+								                        </div>
+								                        <div class="modal-footer">
+								                            <form method="post" th:action="@{'/admin/reviews/' + ${houseReview.getId()} + '/undisplay'}" th:object="${reviewInputForm}">
+																
+								                                <input type="hidden" name="id" th:value="${houseReview.getId()}">
+								                                <input type="hidden" name="score" th:value="${houseReview.getScore()}">
+								                                <input type="hidden" name="comment" th:value="${houseReview.getComment()}">
+								                                <input type="hidden" name="display" th:value="1">
+								                                
+								                                <button type="submit" class="btn samuraitravel-btn-danger text-white shadow-sm">非表示にする</button>
+								                                
+															</form>
+								                        </div>
+								                    </div>
+								                </div>
+								            </div>
+								        </div>
+								    </td>
+								</tr>                                
+                                </tbody>
                              </table>  
                              
                              <!-- ページネーション -->
                              <div th:if="${houseReviews.getTotalPages() > 1}" class="d-flex justify-content-center">
-                                 <nav aria-label="会員一覧ページ">
+                                 <nav aria-label="レビュー一覧ページ">
                                      <ul class="pagination">
                                          <li class="page-item">
                                              <span th:if="${houseReviews.isFirst()}" class="page-link disabled">前</span>

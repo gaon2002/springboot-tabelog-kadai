@@ -1,0 +1,59 @@
+<!--管理者用マイページ　user/my_page.html-->
+
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+    <head>
+        <div th:replace="~{fragment :: meta}"></div>   
+             
+        <div th:replace="~{fragment :: styles}"></div>
+          
+        <title>管理者用マイページ</title>   
+    </head>
+    <body>
+        <div class="samuraitravel-wrapper">
+            <!-- ヘッダー -->
+            <div th:replace="~{fragment :: header}"></div>
+            
+            <main>
+                <div class="container pb-5 samuraitravel-container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-5 col-lg-6 col-md-8">
+                            <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0"> 
+                                    <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>                       
+                                    <li class="breadcrumb-item active" aria-current="page">マイページ（管理者用）</li>
+                                </ol>
+                            </nav> 
+                            
+                            <h1 class="mb-5 text-center">
+                            	<div class="col">
+                               		<span th:text="${user.getName()} + ' (管理者用ページ)'"></span>
+                                </div>
+                            </h1> 
+                            
+                            <div class="container mb-4">
+
+									<ol class="list-unstyled text-center">
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/admin/users}">会員一覧（管理者用）</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/admin/administrator/list}">管理者一覧（管理者用）</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/admin/houses}">店舗一覧（管理者用）</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/admin/reviews}">レビュー一覧（管理者用）</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/admin/categories}">カテゴリー一覧</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/company/edit}">会社情報編集</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/admin/administrator/my_page}">マイページ</a></li>
+									</ol>
+                        		
+                            </div>    
+                                                                                                                                                   
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- フッター -->
+            <div th:replace="~{fragment :: footer}"></div>
+        </div>    
+        
+        <div th:replace="~{fragment :: scripts}"></div>  
+  </body>
+</html>

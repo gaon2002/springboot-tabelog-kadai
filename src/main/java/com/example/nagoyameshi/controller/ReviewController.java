@@ -29,6 +29,8 @@ import com.example.nagoyameshi.repository.UserRepository;
 import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.ReviewService;
 
+import jakarta.persistence.EntityNotFoundException;
+
 
 
 @Controller
@@ -105,34 +107,42 @@ public class ReviewController {
  }
 		 
 	
-	// admin/reviews/index.html
-	// 非表示(display=1)にしたレビューを更新するメソッド：更新情報をreviewService(Repositoryを使ってデータ更新)に送信、エラーがあればビューに表示する
-	@PostMapping("/admin/reviews/{reviewId}/update")
+//	admin/reviews/index.html
+//	レビューを非表示(display=1)にする：更新情報をreviewService(Repositoryを使ってデータ更新)に送信、エラーがあればビューに表示する
+	@PostMapping("/admin/reviews/{reviewId}/undisplay")
 	public String undisplay(@PathVariable("reviewId") Integer reviewId,
-							@ModelAttribute("reviewInputForm") @Validated ReviewInputForm reviewInputForm, 
-							BindingResult bindingResult, 
-							RedirectAttributes redirectAttributes) {
-		
-		// Debugging line to check form values
+	                        @ModelAttribute("reviewInputForm") @Validated ReviewInputForm reviewInputForm, 
+	                        BindingResult bindingResult, 
+	                        RedirectAttributes redirectAttributes) {
+
+	    System.out.println("レビューを非表示にするメソッドスタート:" + reviewInputForm);
+
+	    // Debugging line to check form values
 	    if (reviewInputForm.getId() == null) {
 	        reviewInputForm.setId(reviewId); // Setting the ID manually if it’s null
-	        
 	        System.out.println("Setting ID manually: " + reviewInputForm.getId());
 	    }
 
 	    System.out.println("Received review form: " + reviewInputForm);
 
-		
-		if (bindingResult.hasErrors()) {
+	    if (bindingResult.hasErrors()) {
 	        redirectAttributes.addFlashAttribute("errorMessage", "入力にエラーがあります。");
 	        return "redirect:/admin/reviews";
 	    }
-		
-		reviewService.undisplay(reviewInputForm);
-		
-		redirectAttributes.addFlashAttribute("successMessage", "レビューを編集しました。");
-		
-		return "redirect:/admin/reviews";
+
+	    try {
+	        reviewService.undisplay(reviewInputForm);
+	        redirectAttributes.addFlashAttribute("successMessage", "レビューを編集しました。");
+
+        } catch (EntityNotFoundException e) {
+            System.out.println("レビューが見つかりませんでした: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "レビューが見つかりませんでした。");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "エラーが発生しました。");
+        }
+
+	    return "redirect:/admin/reviews";
 	}
 	
 	

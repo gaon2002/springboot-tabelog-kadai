@@ -1,0 +1,78 @@
+<!--会員毎ーページ　user/my_page.html-->
+
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+    <head>
+        <div th:replace="~{fragment :: meta}"></div>   
+             
+        <div th:replace="~{fragment :: styles}"></div>
+          
+        <title>会員情報</title>   
+    </head>
+    <body>
+        <div class="samuraitravel-wrapper">
+            <!-- ヘッダー -->
+            <div th:replace="~{fragment :: header}"></div>
+            
+            <main>
+                <div class="container pb-5 samuraitravel-container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-5 col-lg-6 col-md-8">
+                            <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0"> 
+                                    <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>                       
+                                    <li class="breadcrumb-item active" aria-current="page">会員情報</li>
+                                </ol>
+                            </nav> 
+                            
+                            <h1 class="mb-5 text-center">
+                            	<div class="col">
+                               		<span th:text="${user.getName()} + 'さんのマイページ'"></span>
+                                </div>
+                            </h1> 
+                            
+                            <div class="container mb-4">
+                                
+								<div sec:authorize="hasRole('ROLE_FREE')">
+									<ol class="list-unstyled text-center">
+									
+										<li class="mb-2"><a class="samuraitravel-page-link mb-2" th:href="@{/user}">店舗一覧(会員用)</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/user}">会員情報</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/user/UserPasswordChange}">パスワード変更</a></li>
+									</ol>
+									
+									<form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
+	                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">有料会員になる</button>
+	                        		</form>
+									
+                        		</div>
+                        		
+                        		<div sec:authorize="hasRole('ROLE_PAID')">
+									<ol class="list-unstyled text-center">
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/houses}">店舗一覧(会員用)</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/user}">会員情報</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/reservations}">予約一覧</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/favorite}">お気に入り一覧</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/user/UserPasswordChange}">パスワード変更</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/user/UserUpdatePayment}">支払情報更新</a></li>
+										<li class="mb-2"><a class="samuraitravel-page-link" th:href="@{/user/cancel-subscription}">サブスク解除</a></li>
+									</ol>
+									
+                        		</div>
+                        		
+                        		
+                        		
+                            </div>    
+                                                                                                                                                   
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- フッター -->
+            <div th:replace="~{fragment :: footer}"></div>
+        </div>    
+        
+        <div th:replace="~{fragment :: scripts}"></div>  
+  </body>
+</html>

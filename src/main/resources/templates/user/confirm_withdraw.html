@@ -1,0 +1,61 @@
+<!--会員情報詳細　user/index.html-->
+
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+    <head>
+        <div th:replace="~{fragment :: meta}"></div>   
+             
+        <div th:replace="~{fragment :: styles}"></div>
+          
+        <title>会員情報</title>   
+    </head>
+    <body>
+        <div class="samuraitravel-wrapper">
+            <!-- ヘッダー -->
+            <div th:replace="~{fragment :: header}"></div>
+            
+            <main>
+                <div class="container pb-5 samuraitravel-container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-5 col-lg-6 col-md-8">
+                            <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0"> 
+                                    <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>                       
+                                    <li class="breadcrumb-item"><a th:href="@{/user}">会員情報</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">退会</li>
+                                </ol>
+                            </nav> 
+                            
+                            <h1 class="mb-3 text-center">本当に退会しますか？</h1> 
+                            
+                                  
+                            
+ 
+                        		
+<!--                        	無料会員の退会-->
+                        		<div sec:authorize="hasRole('ROLE_FREE')">
+									<form id="checkout-form" th:action="@{/user/FREEdelete}" method="post">
+	                            		<button id="withdraw-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">退会手続き</button>
+	                        		</form>
+                        		</div>
+                        		
+<!--                        	有料会員の退会-->
+                        		<div sec:authorize="hasRole('ROLE_PAID')">
+									<form id="checkout-form" th:action="@{/user/PAIDdelete}" method="post">
+	                            		<button id="withdraw-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">退会手続き</button>
+	                        		</form>
+                        		</div>
+                                                                 
+                            </div>                                                                                                                           
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- フッター -->
+            <div th:replace="~{fragment :: footer}"></div>
+        </div>    
+        
+        <div th:replace="~{fragment :: scripts}"></div>  
+  </body>
+</html>

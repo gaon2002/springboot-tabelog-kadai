@@ -1,4 +1,4 @@
-<!--会員情報詳細　user/index.html-->
+<!--会社情報詳細　user/index.html-->
 
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
@@ -7,7 +7,7 @@
              
         <div th:replace="~{fragment :: styles}"></div>
           
-        <title>会員情報</title>   
+        <title>会社情報</title>   
     </head>
     <body>
         <div class="samuraitravel-wrapper">
@@ -21,17 +21,13 @@
                             <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0"> 
                                     <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>                       
-                                    <li class="breadcrumb-item active" aria-current="page">会員情報</li>
+                                    <li class="breadcrumb-item active" aria-current="page">会社概要</li>
                                 </ol>
                             </nav> 
                             
-                            <h1 class="mb-3 text-center">会員情報</h1> 
+                            <h1 class="mb-3 text-center">会社情報</h1> 
                             
-                            <div class="d-flex justify-content-end align-items-end mb-3">                    
-                                <div>
-                                    <a th:href="@{/user/edit}">編集</a>                        
-                                </div>
-                            </div>                                       
+                            
                             
                             <div th:if="${successMessage}" class="alert alert-info">
                                 <span th:text="${successMessage}"></span>
@@ -44,43 +40,23 @@
                             <div class="container mb-4">
                                 <div class="row pb-2 mb-2 border-bottom">
                                     <div class="col-4">
-                                        <span class="fw-bold">氏名</span>
+                                        <span class="fw-bold">会社名</span>
                                     </div>
             
                                     <div class="col">
-                                        <span th:text="${user.getName()}"></span>
+                                        <span th:text="${company.getCompanyName()}"></span>
                                     </div>
                                 </div>                    
             
                                 <div class="row pb-2 mb-2 border-bottom">
                                     <div class="col-4">
-                                        <span class="fw-bold">フリガナ</span>
+                                        <span class="fw-bold">代表者</span>
                                     </div>
             
                                     <div class="col">
-                                        <span th:text="${user.getFurigana()}"></span>
+                                        <span th:text="${company.getPrinciple()}"></span>
                                     </div>
                                 </div>   
-                                
-                                <div class="row pb-2 mb-2 border-bottom">
-                                    <div class="col-4">
-                                        <span class="fw-bold">誕生日</span>
-                                    </div>
-            
-                                    <div class="col">
-                                        <span th:text="${user.getBirthday()}"></span>
-                                    </div>
-                                </div>   
-                                
-                                <div class="row pb-2 mb-2 border-bottom">
-                                    <div class="col-4">
-                                        <span class="fw-bold">年齢</span>
-                                    </div>
-            
-                                    <div class="col">
-                                        <span th:text="${user.getAge()}"></span>
-                                    </div>
-                                </div>            
                                 
                                 <div class="row pb-2 mb-2 border-bottom">
                                     <div class="col-4">
@@ -88,7 +64,7 @@
                                     </div>
             
                                     <div class="col">
-                                        <span th:text="${user.getPostalCode()}"></span>
+                                        <span th:text="${company.getPostalCode()}"></span>
                                     </div>
                                 </div>   
                                 
@@ -98,56 +74,60 @@
                                     </div>
             
                                     <div class="col">
-                                        <span th:text="${user.getAddress()}"></span>
+                                        <span th:text="${company.getAddress()}"></span>
+                                    </div>
+                                </div>            
+                                
+                                <div class="row pb-2 mb-2 border-bottom">
+                                    <div class="col-4">
+                                        <span class="fw-bold">設立</span>
+                                    </div>
+            
+                                    <div class="col">
+                                        <span th:text="${company.getEstablishment()}"></span>
+                                    </div>
+                                </div>   
+                                
+                                <div class="row pb-2 mb-2 border-bottom">
+                                    <div class="col-4">
+                                        <span class="fw-bold">資本金</span>
+                                    </div>
+            
+                                    <div class="col">
+                                        <span th:text="${company.getCapitalStock()}"></span>
                                     </div>
                                 </div>
             
+                                <div class="row pb-2 mb-2 border-bottom">
+                                    <div class="col-4">
+                                        <span class="fw-bold">事業内容</span>
+                                    </div>
+            
+                                    <div class="col">
+                                        <span th:text="${company.getBusiness()}"></span>
+                                    </div>
+                                </div>  
+                                
+                                <div class="row pb-2 mb-2 border-bottom">
+                                    <div class="col-4">
+                                        <span class="fw-bold">従業員数</span>
+                                    </div>
+            
+                                    <div class="col">
+                                        <span th:text="${company.getNumberOfMember()}"></span>
+                                    </div>
+                                </div>
+                                
                                 <div class="row pb-2 mb-2 border-bottom">
                                     <div class="col-4">
                                         <span class="fw-bold">電話番号</span>
                                     </div>
             
                                     <div class="col">
-                                        <span th:text="${user.getPhoneNumber()}"></span>
-                                    </div>
-                                </div>  
-                                
-                                <div class="row pb-2 mb-2 border-bottom">
-                                    <div class="col-4">
-                                        <span class="fw-bold">メールアドレス</span>
-                                    </div>
-            
-                                    <div class="col">
-                                        <span th:text="${user.getEmail()}"></span>
+                                        <span th:text="${company.getPhoneNumber()}"></span>
                                     </div>
                                 </div>
                                 
-                                <div class="row pb-2 mb-2 border-bottom">
-                                    <div class="col-4">
-                                        <span class="fw-bold">会員タイプ</span>
-                                    </div>
-									 <div class="col">
-									    <div th:switch="${user.getSubscribe()}">
-									        <span th:case="2">有料会員</span>
-									        <span th:case="3">無料会員</span>
-									    </div>
-									 </div>
-                                </div>   
-                                
-								<div sec:authorize="hasRole('ROLE_FREE')">
-									<form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
-	                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">有料会員手続き</button>
-	                        		</form>
-                        		</div>
-                        		
-<!--                        	退会-->
-                        		
-                        		<div class="text-center mt-4">
-									<a th:href="@{/user/confirm_withdraw}" >退会する</a>
-								</div>
-                      
-                        		
-                                                                 
                             </div>                                                                                                                           
                         </div>
                     </div>

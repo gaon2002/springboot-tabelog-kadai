@@ -3,6 +3,7 @@ package com.example.nagoyameshi.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,9 +20,11 @@ import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.form.AdminUserEditForm;
 import com.example.nagoyameshi.form.AdminUserRegisterForm;
 import com.example.nagoyameshi.repository.UserRepository;
+import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.AdminUserService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 @Controller
 @RequestMapping("/admin/administrator")
@@ -44,6 +47,19 @@ public class AdminUserController {
             
             return "admin/administrator/index";
         }
+    
+//  マイページ表示
+    @GetMapping("/my_page")
+    @Transactional
+    public String mypage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
+//    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
+//    	userRepositoryからgetReferenceById()を使って最新情報を取得する
+    	User user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
+        
+        model.addAttribute("user", user);
+        
+        return "/admin/administrator/my_page";
+    }
         
 //  管理者詳細表示
     @GetMapping("/detail/{id}")

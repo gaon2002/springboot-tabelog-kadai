@@ -34,7 +34,7 @@ public class WebSecurityConfig {
 		http
 			.authorizeHttpRequests((requests) -> requests
 					// すべてのユーザーにアクセスを許可するURL。 ()内にルートパスを記述する。
-					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/" ,"/signup/**", "/houses", "/houses/{id}", "/stripe/webhook","/houses/{id}/reviews/","/houses/*/reviews/**","check-role", "/auth/UserNewPasswordIssue", "/auth/UserResetPassword", "/reset-password").permitAll()
+					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/" ,"/signup/**", "/houses", "/company/**", "/houses/{id}", "/stripe/webhook","/houses/{id}/reviews/","/houses/*/reviews/**","check-role", "/auth/UserNewPasswordIssue", "/auth/UserResetPassword", "/reset-password").permitAll()
 					// 管理者のみのアクセスを許可するURL
 					.requestMatchers("/admin/**").hasRole("ADMIN")
 					// 上記以外はログインが必要（ロールは問わない）

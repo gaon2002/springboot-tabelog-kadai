@@ -388,3 +388,5 @@ INSERT IGNORE INTO reviews (id, house_id, user_id,score,comment,display) VALUES(
 INSERT IGNORE INTO reviews (id, house_id, user_id,score,comment,display) VALUES(149,59,8,2,'料理のプレゼンテーションが美しく、見て楽しめました。',0);
 INSERT IGNORE INTO reviews (id, house_id, user_id,score,comment,display) VALUES(150,60,8,2,'友人の紹介で来ましたが、大満足でした。',0);
 
+
+INSERT IGNORE INTO company (id,company_name,principle,postal_code,address,Establishment,capital_stock,business,number_of_member,phone_number) VALUES (1,'NAGOYAMESHI株式会社','侍 太郎','〒101-0022',' 東京都千代田区神田練塀町300番地 住友不動産秋葉原駅前ビル5F','2011年5月30日','110,000千円','飲食店等の情報提供サービス','83名','03-1234-5678');

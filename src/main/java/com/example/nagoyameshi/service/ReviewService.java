@@ -124,8 +124,6 @@ public class ReviewService {
 		
 		Review review = reviewRepository.getReferenceById(reviewInputForm.getId());
 		
-		System.out.println(review);
-		
 		review.setDisplay(reviewInputForm.getDisplay());       
         // reviewテーブルの保存
 		reviewRepository.save(review);

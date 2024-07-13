@@ -17,6 +17,7 @@ import com.stripe.model.SubscriptionCollection;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerUpdateParams;
+import com.stripe.param.PaymentMethodAttachParams;
 import com.stripe.param.PaymentMethodListParams;
 import com.stripe.param.SubscriptionListParams;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -191,11 +192,41 @@ public class StripeService {
      
      
 //   カード情報更新メソッド
+     
      public void updatePaymentMethod(String customerId, String paymentMethodId) throws StripeException {
-         CustomerUpdateParams params = CustomerUpdateParams.builder()
-                 .setInvoiceSettings(CustomerUpdateParams.InvoiceSettings.builder()
-                         .setDefaultPaymentMethod(paymentMethodId).build())
-                 .build();
-         Customer.retrieve(customerId).update(params);
+    	    // PaymentMethodをカスタマーにアタッチ
+    	    PaymentMethod paymentMethod = PaymentMethod.retrieve(paymentMethodId);
+    	    PaymentMethodAttachParams attachParams = PaymentMethodAttachParams.builder()
+    	        .setCustomer(customerId)
+    	        .build();
+    	    paymentMethod.attach(attachParams);
+
+    	    // カスタマーのデフォルト支払い方法を更新
+    	    Customer customer = Customer.retrieve(customerId);
+    	    CustomerUpdateParams params = CustomerUpdateParams.builder()
+    	        .setInvoiceSettings(
+    	            CustomerUpdateParams.InvoiceSettings.builder()
+    	                .setDefaultPaymentMethod(paymentMethodId)
+    	                .build()
+    	        )
+    	        .build();
+    	    customer.update(params);
+    	}
+     
+//   カード情報表示
+     public PaymentMethod getDefaultPaymentMethod(String customerId) {
+         try {
+        	 
+             Customer customer = Customer.retrieve(customerId);
+             String defaultPaymentMethodId = customer.getInvoiceSettings().getDefaultPaymentMethod();
+             
+             if (defaultPaymentMethodId != null) {
+                 return PaymentMethod.retrieve(defaultPaymentMethodId);
+             }
+         } catch (StripeException e) {
+             // エラーログ記録やエラーハンドリング
+         }
+         return null;
      }
+     
 }

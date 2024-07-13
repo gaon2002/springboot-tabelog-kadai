@@ -28,38 +28,17 @@
                             </div>
                             
                             
-<!--							確認用-->
-							<div sec:authorize="isAuthenticated()">
-							    <p>認証ユーザー: <span sec:authentication="name"></span></p>
-							    <p>権限: <span sec:authentication="authorities"></span></p>
-							</div>	
 							
-							<div sec:authorize="hasRole('ROLE_PAID')">
-						        <p>このユーザーは有料会員です。</p>
-						    </div>
-						    <div sec:authorize="hasRole('ROLE_FREE')">
-						        <p>このユーザーは無料会員です。</p>
-						    </div>
-						    
-						        <script>
-							        document.addEventListener('DOMContentLoaded', (event) => {
-							            const rolesElement = document.getElementById('roles');
-							            console.log('Roles:', rolesElement.textContent);
-							        });
-							 	</script>
-						    
-<!--							確認用-->
-							
-<!--：支払い機能が追加出来たらコメントアウトを削除する							<div sec:authorize="hasRole('ROLE_PAID')">-->
-								 <form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
-                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">月額料金決済手続き</button>
-                        		 </form>
-                        		 
-									
-<!--：支払い機能が追加出来たらコメントアウトを削除する								</div>-->
+								<div sec:authorize="hasRole('ROLE_PAID')">
+									<form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
+	                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">月額料金決済手続き</button>
+	                        		</form>
+                        		</div>
 							
 							<div sec:authorize="hasRole('ROLE_FREE')">
-        						<a href="#">会員ホームに戻る</a>
+								<div class="text-center mt-4">
+        							<a th:href="@{/}">会員ホームに戻る</a>
+        						</div>
 							</div>
                             
                             

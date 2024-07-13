@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### application-development.propertiesをgithubに上げないようにする ###
+/src/main/resources/application-development.properties

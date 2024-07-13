@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,6 +32,7 @@ import com.example.nagoyameshi.security.UserDetailsServiceImpl;
 import com.example.nagoyameshi.service.StripeService;
 import com.example.nagoyameshi.service.UserService;
 import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentMethod;
 import com.stripe.model.checkout.Session;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,6 +70,19 @@ public class UserController {
         model.addAttribute("user", user);
         
         return "user/index";
+    }
+    
+//  マイページ表示
+    @GetMapping("/my_page")
+    @Transactional
+    public String mypage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
+//    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
+//    	userRepositoryからgetReferenceById()を使って最新情報を取得する
+    	User user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
+        
+        model.addAttribute("user", user);
+        
+        return "user/my_page";
     }
     
 //  ユーザー情報の編集➀：フォームへ元情報をセットする
@@ -185,20 +200,38 @@ public class UserController {
 //	カード情報更新➀：このメソッドはユーザーが新しいカード情報を入力するフォームを表示
     @GetMapping("/UserUpdatePayment")
 
-    public String updatePaymentMethodForm() {
-    System.out.println("支払情報更新スタート"); 	//【OK】スタートできている
+    public String updatePaymentMethodForm(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+    									  Model model) {
+    	
+    	System.out.println("支払情報更新スタート"); 	//【OK】スタートできている
+    
+	    String customerId = userDetailsImpl.getUser().getRememberToken(); // Stripeの顧客ID
+	    PaymentMethod paymentMethod = stripeService.getDefaultPaymentMethod(customerId);
+	
+	    if (paymentMethod != null && paymentMethod.getCard() != null) {
+	        model.addAttribute("cardBrand", paymentMethod.getCard().getBrand());
+	        model.addAttribute("last4", paymentMethod.getCard().getLast4());
+	        model.addAttribute("expiryMonth", paymentMethod.getCard().getExpMonth());
+	        model.addAttribute("expiryYear", paymentMethod.getCard().getExpYear());
+	    }
+
         return "user/UserUpdatePayment";
     }
 
 //	カード情報更新➁：新しいカード情報を受け取り、Stripeに更新リクエストを送る
     @PostMapping("/update-payment-method")
-    public String updatePaymentMethod(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
-    								  @RequestParam String paymentMethodId,
-    								  RedirectAttributes redirectAttributes, 
-    								  Model model) 
+    public String updatePaymentMethod(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+            						  @RequestParam String paymentMethodId,
+            						  RedirectAttributes redirectAttributes,
+            						  Model model) 
     {
-    	User user = userDetailsImpl.getUser();
-        String customerId = user.getRememberToken();
+    	
+    	System.out.println("stripeへ支払情報登録フェーズ"); 	//【OK】スタートできている
+    	
+    	String customerId = userDetailsImpl.getUser().getRememberToken();
+    	
+    	System.out.println("customerId：" + customerId); 	//【OK】スタートできている
+    	System.out.println("paymentMethodId：" + paymentMethodId); 	//【OK】スタートできている
 
         try {
             stripeService.updatePaymentMethod(customerId, paymentMethodId);
@@ -206,6 +239,14 @@ public class UserController {
             return "redirect:/user";
             
         } catch (StripeException e) {
+        	
+        	System.out.println("Error updating payment method: " + e.getMessage());
+        	
+        	if (e.getStripeError() != null) {
+                System.out.println("Stripe Error: " + e.getStripeError().getMessage());
+                System.out.println("Stripe Error Code: " + e.getStripeError().getCode());
+                System.out.println("Stripe Error Type: " + e.getStripeError().getType());
+            }
         	model.addAttribute("errorMessage", "支払情報の更新に失敗しました。再試行してください。");
             return "user/UserUpdatePayment";
         }
@@ -287,6 +328,70 @@ public class UserController {
           redirectAttributes.addFlashAttribute("successMessage", "パスワードが変更されました。");
 //          model.addAttribute("UserPasswordChangeForm", new UserPasswordChangeForm()); // 成功時に新しいフォームオブジェクトを設定
           return "redirect:/houses";
+      }
+      
+     
+//    退会確認画面表示
+      @GetMapping("/confirm_withdraw")
+      public String confirmWithdraw(Model model) {
+          // 必要に応じてモデルにデータを追加
+          return "user/confirm_withdraw"; // Thymeleafテンプレートの名前
+      }
+      
+//	  有料会員ユーザー情報のの削除（DBからも削除する）
+      @PostMapping("/PAIDdelete")
+      public String paid_delete(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+    		  			   HttpServletRequest request, HttpServletResponse response,
+    		  			   RedirectAttributes redirectAttributes)
+      {
+    	User user = userDetailsImpl.getUser();
+    	String customerId = user.getRememberToken();
+        
+        try {
+//        	Stripeの解除メソッド呼び出し
+            stripeService.cancelSubscription(customerId);
+            stripeService.deletePaymentMethods(customerId);
+  		
+            userRepository.deleteById(user.getId());
+  		
+//		ログアウト処理
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+  		
+  		redirectAttributes.addFlashAttribute("successMessage", "退会しました。");
+  		
+  		return "redirect:/?loggedOut";
+  		
+        } catch (StripeException e) {
+        	redirectAttributes.addFlashAttribute("errorMessage", "エラーが発生しました。");
+            return "redirect:/user";
+        }
+  	}
+      
+	  @PostMapping("/FREEdelete")
+      public String free_delete(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+              HttpServletRequest request, HttpServletResponse response,
+              RedirectAttributes redirectAttributes) 
+      {
+		try {
+			// reviewRepositoryを使ってデータのCRUD処理を行う、deleteById(受け取った引数)メソッドで削除
+			Integer user = userDetailsImpl.getUser().getId();
+			userRepository.deleteById(user);
+			
+			// ログアウト処理
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			if (auth != null) {
+				new SecurityContextLogoutHandler().logout(request, response, auth);
+			}
+				redirectAttributes.addFlashAttribute("successMessage", "退会しました。");
+				return "redirect:/?loggedOut";
+				
+			} catch (Exception e) {
+				redirectAttributes.addFlashAttribute("errorMessage", "エラーが発生しました。");
+				return "redirect:/user";
+			}
       }
 
 }
