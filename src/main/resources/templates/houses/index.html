@@ -136,7 +136,7 @@
                                  <p th:unless="${housePage.getTotalPages() > 1}" class="fs-5 mb-3" th:text="${'検索結果：' + housePage.getTotalElements() + '件'}"></p>
                                  
 <!--                             検索キーワード                          -->
-                                 <p class="fs-5 mb-3" th:text="${'検索ワード：' + keyword}"></p> 
+<!--                                 <p class="fs-5 mb-3" th:text="${'検索ワード：' + keyword}"></p> -->
                                        
 <!--                            並べ替え-->
                                  <form method="get" th:action="@{/houses}" class="mb-3 samuraitravel-sort-box"> 

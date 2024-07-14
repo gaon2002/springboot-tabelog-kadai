@@ -170,7 +170,6 @@ public class UserController {
 	        User user = userRepository.findByRememberToken(customerId);
 	        
 	        if (user == null) {
-	            System.out.println("ユーザーが見つかりませんでした。customerId：" + customerId);
 	            redirectAttributes.addFlashAttribute("errorMessage", "ユーザーが見つかりませんでした。");
 	            return "redirect:/error";
 	        }
@@ -202,10 +201,8 @@ public class UserController {
 
     public String updatePaymentMethodForm(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
     									  Model model) {
-    	
-    	System.out.println("支払情報更新スタート"); 	//【OK】スタートできている
-    
-	    String customerId = userDetailsImpl.getUser().getRememberToken(); // Stripeの顧客ID
+ 
+ 	    String customerId = userDetailsImpl.getUser().getRememberToken(); // Stripeの顧客ID
 	    PaymentMethod paymentMethod = stripeService.getDefaultPaymentMethod(customerId);
 	
 	    if (paymentMethod != null && paymentMethod.getCard() != null) {
@@ -226,13 +223,8 @@ public class UserController {
             						  Model model) 
     {
     	
-    	System.out.println("stripeへ支払情報登録フェーズ"); 	//【OK】スタートできている
-    	
     	String customerId = userDetailsImpl.getUser().getRememberToken();
     	
-    	System.out.println("customerId：" + customerId); 	//【OK】スタートできている
-    	System.out.println("paymentMethodId：" + paymentMethodId); 	//【OK】スタートできている
-
         try {
             stripeService.updatePaymentMethod(customerId, paymentMethodId);
             redirectAttributes.addFlashAttribute("successMessage", "支払情報が更新されました。");
@@ -240,9 +232,7 @@ public class UserController {
             
         } catch (StripeException e) {
         	
-        	System.out.println("Error updating payment method: " + e.getMessage());
-        	
-        	if (e.getStripeError() != null) {
+         	if (e.getStripeError() != null) {
                 System.out.println("Stripe Error: " + e.getStripeError().getMessage());
                 System.out.println("Stripe Error Code: " + e.getStripeError().getCode());
                 System.out.println("Stripe Error Type: " + e.getStripeError().getType());
@@ -259,8 +249,6 @@ public class UserController {
     								 RedirectAttributes redirectAttributes,
     								 Model model)
     {
-    	
-    	System.out.println("支払情報解除スタート"); 
     	
     	User user = userDetailsImpl.getUser();
         String customerId = user.getRememberToken();

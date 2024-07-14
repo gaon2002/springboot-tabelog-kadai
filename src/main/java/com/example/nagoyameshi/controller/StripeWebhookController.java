@@ -34,7 +34,6 @@ public class StripeWebhookController {
                 break;
             // Handle other event types
             default:
-                System.out.println("Unhandled event type: " + event.getType());
         }
 
         return ResponseEntity.ok("");

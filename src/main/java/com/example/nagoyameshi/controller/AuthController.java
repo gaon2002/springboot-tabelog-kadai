@@ -136,21 +136,6 @@ public class AuthController {
     }
         
 
-
-////  【長尾作成】メール認証後ログイン状態にしておくためのメソッド
-//    private void authenticateUser(User user) {
-//    	Collection<GrantedAuthority> authorities = user.getRoles();  // userからroles/authoritiesを取得
-//    	
-//    	UserDetails userDetails = new UserDetailsImpl(user, authorities);  // authoritiesも渡す
-//    	System.out.println(userDetails.getUsername());	//ここまでOK(6/15)
-//    	
-//    	Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-////    	セッションスコープにログイン情報が設定される
-//    	SeurityContextHolder.getContext().setAuthentication(auth);
-//       
-//    }
- 
-
 //  メール認証後ログイン状態にしておくためのメソッド（長尾作成）
  
 //    SecurityContextHolderにてセッションスコープへログイン情報がセットされる部分を

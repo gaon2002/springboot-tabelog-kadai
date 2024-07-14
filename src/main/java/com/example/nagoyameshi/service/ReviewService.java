@@ -75,7 +75,6 @@ public class ReviewService {
 	public Page<Review> findReviewsByHouseName(String name, Pageable pageable) {
 		
 	    List<House> houses = houseRepository.findByNameContaining(name);
-	    System.out.println("Found Houses: " + houses);  //ここまではコレクションできている
 	    
 	    if (houses.isEmpty()) {
 	        return Page.empty();
@@ -83,11 +82,7 @@ public class ReviewService {
 	    
 	    List<Integer> houseIds = houses.stream().map(House::getId).collect(Collectors.toList());
 	    
-	    System.out.println("Found HouseIds: " + houseIds);  //ここまではコレクションできている
-	    
 	    Page<Review> page = reviewRepository.findByHouseIdIn(houseIds, pageable);
-	    
-	    System.out.println(page.getTotalPages());
 	    
 	    return page;
 	    		
@@ -98,7 +93,6 @@ public class ReviewService {
 	// ユーザーのキーワード検索を実現する
 	public Page<Review> findReviewsByUserEmail(String email, Pageable pageable) {
 	    List<User> users = userRepository.findByEmailContaining(email);
-	    System.out.println("Found Users: " + users);
 	    
 	    if (users.isEmpty()) {
 	        return Page.empty();
@@ -120,7 +114,6 @@ public class ReviewService {
 	public void undisplay(ReviewInputForm reviewInputForm) {
 		
 		// Debugging line
-	    System.out.println("Service received review form: " + reviewInputForm);
 		
 		Review review = reviewRepository.getReferenceById(reviewInputForm.getId());
 		

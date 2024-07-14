@@ -85,8 +85,6 @@ public class ReviewController {
 	        // 店舗名で検索
 	        houseReviews = reviewService.findReviewsByHouseName(keyword, pageable);
 	        
-	        System.out.println("houseReviews：" + houseReviews);  // Page 1 of 0 containing UNKNOWN instances
-	        
 	        if (houseReviews.isEmpty()) {
 	            // 該当する店舗が無い場合、ユーザーアドレスで検索
 	            houseReviews = reviewService.findReviewsByUserEmail(keyword, pageable);
@@ -95,9 +93,7 @@ public class ReviewController {
 	        // キーワードが無い場合、全レビューを取得
 	        houseReviews = reviewRepository.findAll(pageable);
 	    }
-        
-	    System.out.println("houseReview:" + houseReviews.getTotalPages());
-	    
+ 	    
 	    model.addAttribute("houseReviews", houseReviews);
 	    model.addAttribute("keyword", keyword);
 //    	編集用に空の ReviewEditFormを渡す。
@@ -115,15 +111,11 @@ public class ReviewController {
 	                        BindingResult bindingResult, 
 	                        RedirectAttributes redirectAttributes) {
 
-	    System.out.println("レビューを非表示にするメソッドスタート:" + reviewInputForm);
-
 	    // Debugging line to check form values
 	    if (reviewInputForm.getId() == null) {
 	        reviewInputForm.setId(reviewId); // Setting the ID manually if it’s null
-	        System.out.println("Setting ID manually: " + reviewInputForm.getId());
 	    }
 
-	    System.out.println("Received review form: " + reviewInputForm);
 
 	    if (bindingResult.hasErrors()) {
 	        redirectAttributes.addFlashAttribute("errorMessage", "入力にエラーがあります。");
@@ -135,7 +127,6 @@ public class ReviewController {
 	        redirectAttributes.addFlashAttribute("successMessage", "レビューを編集しました。");
 
         } catch (EntityNotFoundException e) {
-            System.out.println("レビューが見つかりませんでした: " + e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "レビューが見つかりませんでした。");
         } catch (Exception e) {
             e.printStackTrace();

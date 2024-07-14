@@ -137,8 +137,7 @@ public class StripeService {
      public void cancelSubscription(String customerId) throws StripeException {
          try {
              // 顧客IDからサブスクリプションを取得
-             System.out.println("cancelSubscription()メソッドスタート");
-
+ 
              SubscriptionCollection subscriptions = Subscription.list(
                  SubscriptionListParams.builder()
                      .setCustomer(customerId)
@@ -147,17 +146,12 @@ public class StripeService {
              );
 
              if (subscriptions == null) {
-                 System.out.println("subscriptionsはnullです");
                  throw new IllegalStateException("サブスクリプションが見つかりませんでした。");
              }
 
              if (subscriptions.getData().isEmpty()) {
-                 System.out.println("サブスクリプションが空です");
                  throw new IllegalStateException("サブスクリプションが見つかりませんでした。");
              }
-
-             // サブスクリプションの情報を出力
-             System.out.println("subscriptions：" + subscriptions);
 
              // 1つの顧客に複数のサブスクリプションがある場合、適切なサブスクリプションを選択するロジックを追加
              Subscription subscription = subscriptions.getData().get(0);

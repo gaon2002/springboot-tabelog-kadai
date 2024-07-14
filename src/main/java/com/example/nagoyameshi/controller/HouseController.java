@@ -33,7 +33,6 @@ import com.example.nagoyameshi.service.ReviewService;
 @Controller
 @RequestMapping("/houses")
 public class HouseController {
-	private static final int List = 0;
 	private final HouseRepository houseRepository;
 	private final CategoryRepository categoryRepository;
 	private final ReviewRepository reviewRepository;

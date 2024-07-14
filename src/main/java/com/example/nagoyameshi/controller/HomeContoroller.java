@@ -12,22 +12,16 @@ import com.example.nagoyameshi.dto.HouseScoreDto;
 import com.example.nagoyameshi.entity.Category;
 import com.example.nagoyameshi.entity.House;
 import com.example.nagoyameshi.repository.CategoryRepository;
-import com.example.nagoyameshi.repository.HouseRepository;
 import com.example.nagoyameshi.service.HouseService;
-import com.example.nagoyameshi.service.ReviewService;
 
 @Controller
 public class HomeContoroller {
 	
-	 private final HouseRepository houseRepository;    
-	 private final ReviewService reviewService;
 	 private final HouseService houseService;
 	 private final CategoryRepository categoryRepository;  
 	 
 	     
-	 public HomeContoroller(HouseRepository houseRepository, ReviewService reviewService, HouseService houseService, CategoryRepository categoryRepository) {
-	     this.houseRepository = houseRepository;      
-	     this.reviewService = reviewService;
+	 public HomeContoroller(HouseService houseService, CategoryRepository categoryRepository) {
 	     this.houseService = houseService;
 	     this.categoryRepository = categoryRepository;
 	 }    

@@ -37,14 +37,14 @@ public class CompanyController {
         try {
             company = companyRepository.findById(1).orElse(null);
         } catch (Exception e) {
-            System.out.println("Error fetching company with ID 1: " + e.getMessage());
+  
             e.printStackTrace(); // スタックトレースを表示
             model.addAttribute("errorMessage", "会社情報の取得に失敗しました。");
             return "error"; // エラーページにリダイレクト
         }
 
         model.addAttribute("company", company);
-        return "company/index";
+        return "/company/index";
     }
     
     

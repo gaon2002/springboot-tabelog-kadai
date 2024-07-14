@@ -34,7 +34,6 @@ public class PasswordResetController {
 //  パスワードのリセット➀：フォーム送信
     @GetMapping("/auth/UserNewPasswordIssue")
     public String showForgotPasswordForm() {
-    	 System.out.println("パスワードリセット画面の表示を試みます。"); // デバッグメッセージ
         return "auth/UserNewPasswordIssue";
     }
 
@@ -75,8 +74,6 @@ public class PasswordResetController {
     @GetMapping("/reset-password")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
     	
-    	System.out.println("パスワード再発行画面の表示を試みます。"); // デバッグメッセージ
-    	
         PasswordResetToken resetToken = userService.getPasswordResetToken(token);
         if (resetToken == null) {
             model.addAttribute("message", "無効なトークンです。");
@@ -94,9 +91,7 @@ public class PasswordResetController {
                                        BindingResult result,
                                        RedirectAttributes redirectAttributes) {
     	
-    	System.out.println("パスワード再発行を試みます。"); // デバッグメッセージ
-    	
-        if (result.hasErrors()) {
+         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "フォームにエラーがあります。");
             return "redirect:/reset-password?token=" + token;
         }
