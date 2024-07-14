@@ -40,7 +40,7 @@ public class CompanyController {
   
             e.printStackTrace(); // スタックトレースを表示
             model.addAttribute("errorMessage", "会社情報の取得に失敗しました。");
-            return "error"; // エラーページにリダイレクト
+            return "/company/error"; // エラーページにリダイレクト
         }
 
         model.addAttribute("company", company);
