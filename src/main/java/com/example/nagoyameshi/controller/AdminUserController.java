@@ -24,7 +24,6 @@ import com.example.nagoyameshi.security.UserDetailsImpl;
 import com.example.nagoyameshi.service.AdminUserService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 
 @Controller
 @RequestMapping("/admin/administrator")
@@ -48,9 +47,8 @@ public class AdminUserController {
             return "admin/administrator/index";
         }
     
-//  マイページ表示
+//  管理者マイページ表示
     @GetMapping("/my_page")
-    @Transactional
     public String mypage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
 //    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
 //    	userRepositoryからgetReferenceById()を使って最新情報を取得する
