@@ -150,7 +150,7 @@ INSERT IGNORE INTO category (id,category,image_name) VALUES (3,'うなぎ','unag
 INSERT IGNORE INTO category (id,category,image_name) VALUES (4,'割烹','kappou_01.jpg');
 INSERT IGNORE INTO category (id,category,image_name) VALUES (5,'カフェ','cafe_02.jpg');
 INSERT IGNORE INTO category (id,category,image_name) VALUES (6,'串カツ','kushikatsu_01.jpg');
-INSERT IGNORE INTO category (id,category,image_name) VALUES (7,'串焼き','kushiyaki_01');
+INSERT IGNORE INTO category (id,category,image_name) VALUES (7,'串焼き','kushiyaki_01.jpg');
 INSERT IGNORE INTO category (id,category,image_name) VALUES (8,'魚料理','gyokai_01.jpg');
 INSERT IGNORE INTO category (id,category,image_name) VALUES (9,'寿司','sushi_01.jpg');
 INSERT IGNORE INTO category (id,category,image_name) VALUES (10,'中華料理','chuka_01.jpg');

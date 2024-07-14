@@ -71,7 +71,7 @@ public class CompanyController {
         return "company/edit";
     }    
     
-//  会社情報の編集➁：編集されたユーザー情報を更新する
+//  会社情報の編集➁：編集された会社情報を更新する
     @PostMapping("/update")
     public String update(@ModelAttribute @Validated CompanyEditForm companyEditForm, 
     					 BindingResult bindingResult, 

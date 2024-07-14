@@ -195,6 +195,15 @@ public class UserController {
     	}
     }
     
+//  サブスク支払いをキャンセルした場合、ユーザ画面に戻る
+    @GetMapping("/cancel")
+    public String cancelPayment(RedirectAttributes redirectAttributes) {
+    	
+    	redirectAttributes.addFlashAttribute("successMessage", "支払処理をキャンセルしました。");
+        // キャンセル時に表示するビューを返す（例：cancel.html）
+        return "redirect:/user";
+    }
+    
     
 //	カード情報更新➀：このメソッドはユーザーが新しいカード情報を入力するフォームを表示
     @GetMapping("/UserUpdatePayment")

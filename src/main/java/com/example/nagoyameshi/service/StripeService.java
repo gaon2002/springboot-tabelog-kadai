@@ -116,8 +116,8 @@ public class StripeService {
 //               支払成功時のリダイレクトURL
                  .setSuccessUrl(requestUrl.replace("/create-checkout-session", "") + "/success?session_id={CHECKOUT_SESSION_ID}")
 //               支払いキャンセル時のリダイレクトURL
-                 .setCancelUrl(requestUrl.replace("/create-checkout-session", "") + "/error") // 支払情報の再登録できるようにボタン設定
-                 
+                 .setCancelUrl(requestUrl.replace("/create-checkout-session", "") + "/cancel") // キャンセル時にリダイレクトするURLを設定
+
                  .build();
          
 //       Stripe APIを呼び出してセッションを作成
