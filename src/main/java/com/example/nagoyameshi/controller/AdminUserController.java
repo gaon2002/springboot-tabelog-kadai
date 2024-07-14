@@ -49,14 +49,22 @@ public class AdminUserController {
     
 //  管理者マイページ表示
     @GetMapping("/my_page")
-    public String mypage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
-//    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
-//    	userRepositoryからgetReferenceById()を使って最新情報を取得する
-    	User user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
-        
+    public String mypage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {
+        User user = null;
+        try {
+            user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
+            if (user == null) {
+                model.addAttribute("errorMessage", "ユーザー情報が見つかりませんでした。");
+                return "admin/administrator/error"; // エラーページのテンプレート名
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("errorMessage", "ユーザー情報の取得に失敗しました。");
+            return "admin/administrator/error"; // エラーページのテンプレート名
+        }
+
         model.addAttribute("user", user);
-        
-        return "/admin/administrator/my_page";
+        return "admin/administrator/my_page"; // 正しいテンプレートのパス
     }
         
 //  管理者詳細表示
