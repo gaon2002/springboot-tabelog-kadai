@@ -15,8 +15,6 @@ import com.example.nagoyameshi.form.CompanyEditForm;
 import com.example.nagoyameshi.repository.CompanyRepository;
 import com.example.nagoyameshi.service.CompanyService;
 
-import jakarta.transaction.Transactional;
-
 @RequestMapping("/company")
 @Controller
 public class CompanyController {
@@ -29,22 +27,23 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-//  会社情報の確認
     @GetMapping("/index")
-    @Transactional
     public String index(Model model) {
         Company company = null;
         try {
             company = companyRepository.findById(1).orElse(null);
+            if (company == null) {
+                model.addAttribute("errorMessage", "会社情報が見つかりませんでした。");
+                return "company/error"; // エラーページのテンプレート名
+            }
         } catch (Exception e) {
-  
             e.printStackTrace(); // スタックトレースを表示
             model.addAttribute("errorMessage", "会社情報の取得に失敗しました。");
-            return "/company/error"; // エラーページにリダイレクト
+            return "company/error"; // エラーページのテンプレート名
         }
 
         model.addAttribute("company", company);
-        return "/company/index";
+        return "company/index"; // 正しいテンプレートのパス
     }
     
     
