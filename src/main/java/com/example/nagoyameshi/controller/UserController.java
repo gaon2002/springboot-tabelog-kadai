@@ -61,7 +61,6 @@ public class UserController {
          
 //  ユーザー情報の確認
     @GetMapping
-    @Transactional
     public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
 //    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
 //    	userRepositoryからgetReferenceById()を使って最新情報を取得する
@@ -74,7 +73,6 @@ public class UserController {
     
 //  マイページ表示
     @GetMapping("/my_page")
-    @Transactional
     public String mypage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, Model model) {         
 //    	userDetailsImpl.getUser().getId()で現在ログインしているユーザー（getUser()）のid（getId()）を取得
 //    	userRepositoryからgetReferenceById()を使って最新情報を取得する
