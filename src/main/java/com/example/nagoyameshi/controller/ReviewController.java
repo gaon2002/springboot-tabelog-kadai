@@ -74,7 +74,6 @@ public class ReviewController {
 // 管理者用店舗レビュー一覧の表示（10件ずつ表示）
 // admin/reviews.html
 	@GetMapping("admin/reviews")
-	// @AuthenticationPrincipalアノテーションを使用し、認証されたユーザーの情報をUserDetailsオブジェクトとして受け取る。
 	public String review(@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable,
 						 Model model,
 						 @RequestParam(name = "keyword", required = false) String keyword) {
@@ -99,7 +98,7 @@ public class ReviewController {
 //    	編集用に空の ReviewEditFormを渡す。
 		model.addAttribute("reviewInputForm", new ReviewInputForm());
                 
-            return "admin/reviews/index";
+            return "admin/reviews";
  }
 		 
 	

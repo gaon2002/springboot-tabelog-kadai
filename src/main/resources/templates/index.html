@@ -45,11 +45,11 @@
                     
                     <h2 class="text-center mb-3">カテゴリから探す</h2>  
                     
-                    <div class="card-text mb-1">
-                        <div class="btn btn-outline-dark me-2" th:each="category : ${categories}">
-                        	<a th:href="@{/houses?categoryIds=__${category.id}__}" th:text="${category.category}"></a>
-                        </div>
-                    </div>  
+                    <div class="card-text mb-1 d-flex justify-content-center flex-wrap">
+					    <div th:each="category : ${categories}" class="me-2 mb-2">
+					        <a th:href="@{/houses?categoryIds=__${category.id}__}" th:text="${category.category}" class="btn btn-outline-dark"></a>
+					    </div>
+					</div>
                             
                     <hr class="mb-3">
                              
@@ -59,7 +59,7 @@
                      
                              <h2 class="text-center mb-3">エリアから探す</h2>                                        
                               
-                             <div>
+                             <div class="card-text mb-1 d-flex justify-content-center flex-wrap">
                                  <a th:href="@{/houses?area=中区}" class="btn btn-outline-dark me-2">中区</a>
                                  <a th:href="@{/houses?area=中村区}" class="btn btn-outline-dark me-2">中村区</a>
                                  <a th:href="@{/houses?area=昭和区}" class="btn btn-outline-dark me-2">昭和区</a>
