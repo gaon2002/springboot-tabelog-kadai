@@ -34,7 +34,7 @@ public class AdminController {
         
 //      キーワード検索ボックスに何か記載されていたら
         if (keyword != null && !keyword.isEmpty()) {
-            userPage = userRepository.findByNameLikeOrFuriganaLike("%" + keyword + "%", "%" + keyword + "%", pageable);   
+            userPage = userRepository.findByNameLikeOrFuriganaOrEmailLike("%" + keyword + "%", "%" + keyword + "%", "%" + keyword + "%", pageable);   
 //      検索ワードがなければ、全表示
         } else {
             userPage = userRepository.findAll(pageable);

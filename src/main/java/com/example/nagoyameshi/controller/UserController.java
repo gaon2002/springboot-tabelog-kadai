@@ -254,7 +254,7 @@ public class UserController {
         try {
             stripeService.updatePaymentMethod(customerId, paymentMethodId);
             redirectAttributes.addFlashAttribute("successMessage", "支払情報が更新されました。");
-            return "redirect:/user";
+            return "redirect:/houses";
             
         } catch (StripeException e) {
         	

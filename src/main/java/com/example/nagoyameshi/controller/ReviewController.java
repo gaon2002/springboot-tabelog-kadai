@@ -98,7 +98,7 @@ public class ReviewController {
 //    	非表示にするために空の ReviewEditFormを渡す。
 		model.addAttribute("reviewInputForm", new ReviewInputForm());
                 
-            return "/admin/reviews/index";
+            return "admin/reviews/index";
  }
 		 
 	

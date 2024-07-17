@@ -1,4 +1,4 @@
--- houses テーブル生成とフィールド設定のコマンド
+-- housesテーブル生成とフィールド設定のコマンド
 
 CREATE TABLE IF NOT EXISTS houses
 (
