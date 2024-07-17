@@ -29,7 +29,7 @@
 								<ol class="breadcrumb mb-0">
 									<li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
 									<li class="breadcrumb-item"><a th:href="@{/houses}">店舗一覧</a></li>
-									<li class="breadcrumb-item active" aria-current="page">店舗詳細</a></li>
+									<li class="breadcrumb-item active" aria-current="page">店舗詳細</li>
 								</ol>
 								
 								<div sec:authorize="isAuthenticated()" class="row justify-content-center mb-4">
@@ -95,11 +95,6 @@
 											
 											<div class="col">
 												<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}" th:text="${star <= houseAverageScore} ? '&#9733;' : '&#9734;'"></span>
-<!--												<span class="samuraitravel-star" th:each="star : ${#numbers.sequence(1, 5)}">-->
-<!--												    <span th:if="${star <= houseAverageScore}">&#9733;</span>  Full star -->
-<!--												    <span th:if="${star > houseAverageScore and star - 0.5 <= houseAverageScore}">&#9733;&#9734;</span>  Half star -->
-<!--												    <span th:if="${star > houseAverageScore and star - 0.5 > houseAverageScore}">&#9734;</span>  Empty star -->
-<!--												</span>-->
 												<span class="text-danger font-weight-bold" th:text="${houseAverageScore}"></span>
 											</div>
 										</div>
