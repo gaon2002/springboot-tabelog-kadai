@@ -73,7 +73,7 @@ public class ReviewController {
 	
 // 管理者用店舗レビュー一覧の表示（10件ずつ表示）
 // admin/reviews.html
-	@GetMapping("admin/reviews")
+	@GetMapping("/admin/reviews")
 	public String review(@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable,
 						 Model model,
 						 @RequestParam(name = "keyword", required = false) String keyword) {
@@ -95,10 +95,10 @@ public class ReviewController {
  	    
 	    model.addAttribute("houseReviews", houseReviews);
 	    model.addAttribute("keyword", keyword);
-//    	編集用に空の ReviewEditFormを渡す。
+//    	非表示にするために空の ReviewEditFormを渡す。
 		model.addAttribute("reviewInputForm", new ReviewInputForm());
                 
-            return "admin/reviews";
+            return "/admin/reviews/index";
  }
 		 
 	
