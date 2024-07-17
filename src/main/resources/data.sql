@@ -1,5 +1,5 @@
 -- housesテーブル
-INSERT IGNORE INTO houses (id, name, image_name, description,price_min, price_max, capacity, postal_code, address, phone_number) VALUES (1,'めしや 酒薬坐 東新町店','izakaya_01.jpg','和風モダンな居酒屋。季節の料理と日本酒のペアリングが楽しめます。',5000,9000,20,'460-0003','名古屋市中区幸楽町2丁目6-7','052-345-6789');
+INSERT IGNORE INTO houses (id, name, image_name, description,price_min, price_max, capacity, postal_code, address, phone_number) VALUES (1,'めしや 酒薬坐 東新町店','izakaya_01.jpg','和風モダンな居酒屋。季節の料理と日本酒のペアリングが楽しめます。',4000,9000,20,'460-0003','名古屋市中区幸楽町2丁目6-7','052-345-6789');
 INSERT IGNORE INTO houses (id, name, image_name, description,price_min, price_max, capacity, postal_code, address, phone_number) VALUES (2,'全席個室 じぶんどき 名駅広小路通店','izakaya_02.jpg','落ち着いた雰囲気の和食居酒屋。厳選された日本酒と共に楽しむ季節の料理が魅力です。',2000,6000,30,'460-0004','名古屋市中区陽光町5丁目8-9','052-456-7890');
 INSERT IGNORE INTO houses (id, name, image_name, description,price_min, price_max, capacity, postal_code, address, phone_number) VALUES (3,'サワデーすみ芳 栄店','izakaya_03.jpg','おしゃれな雰囲気のカジュアル居酒屋。豊富なカクテルメニューが楽しめます。',3000,7000,40,'450-0004','名古屋市中村区紅葉町9丁目18-19','052-901-2345');
 INSERT IGNORE INTO houses (id, name, image_name, description,price_min, price_max, capacity, postal_code, address, phone_number) VALUES (4,'舎人庵・とんぼ','izakaya_04.jpg','和の趣あふれる隠れ家居酒屋。個室も完備で、ゆったりとくつろげます。',4000,8000,50,'466-0003','名古屋市昭和区白梅町3丁目24-25','052-234-7890');
