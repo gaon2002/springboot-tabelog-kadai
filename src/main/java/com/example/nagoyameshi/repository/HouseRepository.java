@@ -37,8 +37,8 @@ public interface HouseRepository extends JpaRepository<House, Integer>  {
     
     
 //  利用金額
-    public Page<House> findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByCreatedAtDesc(Integer priceMax, Integer priceMin, Pageable pageable);
-    public Page<House> findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByPriceMinAsc(Integer priceMax, Integer priceMin, Pageable pageable);
+    public Page<House> findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByCreatedAtDesc(Integer priceMin, Integer priceMax, Pageable pageable);
+    public Page<House> findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByPriceMinAsc(Integer priceMin, Integer priceMax, Pageable pageable);
 //  最小利用金額指定
     public Page<House> findByPriceMinGreaterThanEqualOrderByCreatedAtDesc(Integer priceMin, Pageable pageable);
     public Page<House> findByPriceMinGreaterThanEqualOrderByPriceMinAsc(Integer priceMin, Pageable pageable);

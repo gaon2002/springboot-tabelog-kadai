@@ -177,15 +177,18 @@ public class UserService {
         return passwordResetTokenRepository.findByToken(token);
     }
 
+//  ユーザーパスワードのリセットを行う
     public boolean updatePassword(String token, String newPassword) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token);
+        
         if (resetToken == null) {
-            return false;
+        	throw new IllegalArgumentException("Invalid token");
         }
         Calendar cal = Calendar.getInstance();
         if ((resetToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
             return false;
         }
+        
         User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

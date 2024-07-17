@@ -88,12 +88,12 @@ public class HouseController {
 //      ※利用金額の下限と上限を設定して検索
         } else if (priceMin != null && priceMax != null) {
         	if (order != null && order.equals("priceMinAsc")) {
-                housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByPriceMinAsc(priceMax, priceMin, pageable);
+                housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByPriceMinAsc(priceMin, priceMax, pageable);
         	} else if ("scoreDesc".equals(order)) {
 //              スコアの高い順に並べ替え
-        		housePage = houseService.getHouseAverageScoreSortedGreaterAndLess(priceMax, priceMin, pageable);
+        		housePage = houseService.getHouseAverageScoreSortedGreaterAndLess(priceMin, priceMax, pageable);
             } else {
-                housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMax, priceMin, pageable);
+                housePage = houseRepository.findByPriceMinGreaterThanEqualAndPriceMaxLessThanEqualOrderByCreatedAtDesc(priceMin, priceMax, pageable);
             }     
         	
 //      ※利用金額の下限を設定して検索

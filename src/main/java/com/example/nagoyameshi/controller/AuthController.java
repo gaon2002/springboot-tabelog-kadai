@@ -58,6 +58,7 @@ public class AuthController {
 //	"http://yourdomain.com/login"にアクセスすると、このメソッドが実行される。
     @GetMapping("/login")
     public String login() {        
+    	
 //    	login()メソッドが実行されたときに、auth/loginという名前のビュー（HTMLページ）を返す。
         return "auth/login";
     }
