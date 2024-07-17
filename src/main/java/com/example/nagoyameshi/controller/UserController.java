@@ -12,7 +12,6 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -89,7 +88,16 @@ public class UserController {
     	User user = userRepository.findById(userDetailsImpl.getUser().getId()).orElse(null);
         
 //      保存されているユーザー情報を編集フォームに入れ込むため、各フィールドの項目をインスタンス化
-        UserEditForm userEditForm = new UserEditForm(user.getId(), user.getRole(), user.getName(), user.getFurigana(), user.getAge(), user.getBirthday(), user.getPostalCode(), user.getAddress(), user.getPhoneNumber(), user.getEmail(),user.getSubscribe());
+        UserEditForm userEditForm = new UserEditForm(user.getId(), 
+        											 user.getRole(),
+        											 user.getName(),
+        											 user.getFurigana(),
+        											 user.getAge(),
+        											 user.getBirthday(), 
+        											 user.getPostalCode(),
+        											 user.getAddress(),
+        											 user.getPhoneNumber(),
+        											 user.getEmail());
         
         model.addAttribute("userEditForm", userEditForm);
         
@@ -98,25 +106,32 @@ public class UserController {
     
 //  ユーザー情報の編集➁：編集されたユーザー情報を更新する
     @PostMapping("/update")
-    public String update(@ModelAttribute @Validated UserEditForm userEditForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        // メールアドレスが変更されており、かつ登録済みであれば、BindingResultオブジェクトにエラー内容を追加する
-        if (userService.isEmailChanged(userEditForm) && userService.isEmailRegistered(userEditForm.getEmail())) {
-            FieldError fieldError = new FieldError(bindingResult.getObjectName(), "email", "すでに登録済みのメールアドレスです。");
-            bindingResult.addError(fieldError);                       
-        }
-        
-        if (bindingResult.hasErrors()) {
+    public String update(@ModelAttribute @Validated UserEditForm userEditForm, 
+    					 BindingResult bindingResult,
+    					 RedirectAttributes redirectAttributes) 
+    {
+
+    	if (bindingResult.hasErrors()) {
+    		
             return "user/edit";
         }
-        
-//      userServiceのupdate()メソッドを実行
-        userService.update(userEditForm);
-        
+
+        try {
+            userService.update(userEditForm);
+            
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("errorMessage", e.getMessage());
+            return "user/edit";
+            
+        } catch (Exception e) {
+            bindingResult.reject("errorMessage", "情報の更新に失敗しました。");
+            return "user/edit";
+        }
+
         redirectAttributes.addFlashAttribute("successMessage", "会員情報を編集しました。");
-        
-//      user/index.htmlに戻って表示
         return "redirect:/user";
-    }    
+    }
+    	
     
 //  サブスク料金の支払いのための情報を作り、ビューに渡してStripeに情報を渡しつつ、Stripeを起動
     @PostMapping("/create-checkout-session")

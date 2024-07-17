@@ -14,7 +14,7 @@ import lombok.Data;
 public class UserEditForm {
     @NotNull
     private Integer id;
-    
+
     @NotNull
     private Role role;  
     
@@ -42,6 +42,4 @@ public class UserEditForm {
     @NotBlank(message = "メールアドレスを入力してください。")
     private String email;
     
-    @NotNull(message = "選択してください。")
-    private Integer subscribe;
 }

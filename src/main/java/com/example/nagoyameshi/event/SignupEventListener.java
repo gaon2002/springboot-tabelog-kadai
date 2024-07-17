@@ -5,6 +5,7 @@ package com.example.nagoyameshi.event;
 import java.util.UUID;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,11 @@ public class SignupEventListener {
 //       メール本文（メッセージとtokenを含むURL）をセット
          mailMessage.setText(message + "\n" + confirmationUrl);
 //       メールを送信
-         javaMailSender.send(mailMessage);
+         try {
+             javaMailSender.send(mailMessage);
+         } catch (MailException ex) {
+             // エラーログを出力
+             System.err.println("メール送信に失敗しました: " + ex.getMessage());
+         }
      }
 }

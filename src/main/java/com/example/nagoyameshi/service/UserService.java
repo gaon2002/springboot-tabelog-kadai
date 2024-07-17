@@ -3,7 +3,6 @@ package com.example.nagoyameshi.service;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class UserService {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }    
     
-//    ユーザー新規登録
+//  ユーザー新規登録
     @Transactional
     public User create(SignupForm signupForm) {
         User user = new User();
@@ -73,22 +72,30 @@ public class UserService {
 //  ユーザー情報更新
     @Transactional
     public void update(UserEditForm userEditForm) {
-        Optional<User> optionalUser = userRepository.findById(userEditForm.getId());
-        
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-
-            Integer subscribe = userEditForm.getSubscribe();
-            Role role = null;
-
-            if (subscribe != null) {
-                if (subscribe.equals(2)) {
-                    role = roleRepository.findByName("ROLE_PAID");
-                } else if (subscribe.equals(3)) {
-                    role = roleRepository.findByName("ROLE_FREE");
-                }
+    	
+        // メールが変更されたかどうかのチェック
+    	User user = userRepository.findById(userEditForm.getId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userEditForm.getId()));
+    	
+    	
+    	if (isEmailChanged(userEditForm, user)) {
+            if (isEmailRegistered(userEditForm.getEmail())) {
+                throw new IllegalArgumentException("すでに登録済みのメールアドレスです。");
             }
+        }
+
+        // 必要に応じて role のフェッチもこのタイミングで行う
+        Role role = null;
+        if (user.getSubscribe() != null) {
+            if (user.getSubscribe().equals(2)) {
+                role = roleRepository.findByName("ROLE_PAID");
+            } else if (user.getSubscribe().equals(3)) {
+                role = roleRepository.findByName("ROLE_FREE");
+            }
+        }
+
         
+        user.setRole(role);
         user.setName(userEditForm.getName());
         user.setFurigana(userEditForm.getFurigana());
         user.setBirthday(userEditForm.getBirthday());
@@ -97,18 +104,10 @@ public class UserService {
         user.setAddress(userEditForm.getAddress());
         user.setPhoneNumber(userEditForm.getPhoneNumber());
         user.setEmail(userEditForm.getEmail());
-        user.setRole(role);
-        user.setSubscribe(subscribe);
-        
+
         userRepository.save(user);
         
-        } else {
-            // ユーザーが存在しない場合の処理
-            // 例：例外を投げる、エラーメッセージをログに出力するなど
-            throw new RuntimeException("User not found with id: " + userEditForm.getId());
-        }
     }    
-    
     
     
     // メールアドレスが登録済みかどうかをチェックする
@@ -132,11 +131,17 @@ public class UserService {
         userRepository.save(user);
     }    
     
-//	メールアドレスが変更されたかどうかをチェックする
-    public boolean isEmailChanged(UserEditForm userEditForm) {
-        User currentUser = userRepository.getReferenceById(userEditForm.getId());
-        return !userEditForm.getEmail().equals(currentUser.getEmail());      
-    }  
+////	メールアドレスが変更されたかどうかをチェックする
+//    public boolean isEmailChanged(UserEditForm userEditForm, User user) {
+//    	User currentUser = userRepository.findWithRoleById(userEditForm.getId()).orElseThrow(RuntimeException::new);
+//        return !userEditForm.getEmail().equals(currentUser.getEmail());    
+//    }  
+    
+    private boolean isEmailChanged(UserEditForm userEditForm, User user) {
+        return !userEditForm.getEmail().equals(user.getEmail());
+    }
+    
+    
     
 //  パスワード変更
     @Transactional
