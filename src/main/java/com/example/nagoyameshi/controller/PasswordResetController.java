@@ -2,6 +2,7 @@ package com.example.nagoyameshi.controller;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import com.example.nagoyameshi.service.UserService;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @Controller
@@ -30,6 +32,9 @@ public class PasswordResetController {
 		this.userService = userService;
 		this.mailSender = mailSender;
 	}
+	
+	@Value("${app.base.url}")
+    private String baseUrl;
 
 //  パスワードのリセット➀：フォーム送信
     @GetMapping("/auth/UserNewPasswordIssue")
@@ -39,13 +44,21 @@ public class PasswordResetController {
 
 //  パスワードリセット➁：パスワードを再発行し、メールを送信
     @PostMapping("/auth/UserNewPasswordIssue")
-    public String processForgotPassword(String email, RedirectAttributes redirectAttributes) {
+    public String processForgotPassword(@RequestParam("email") String email,
+    									RedirectAttributes redirectAttributes,
+    									HttpServletRequest httpServletRequest)
+    {
 //    	token作成
         String token = UUID.randomUUID().toString();
         userService.createPasswordResetTokenForUser(email, token);
 
-//      リセットのためのtokenのついたURLを作成
-        String resetUrl = "http://localhost:8080/reset-password?token=" + token;
+//		リセットのためのtokenのついたURLを作成
+        String baseUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + 
+                         (httpServletRequest.getServerPort() == 80 || httpServletRequest.getServerPort() == 443 ? "" : ":" + httpServletRequest.getServerPort());
+        String resetUrl = baseUrl + "/auth/reset-password?token=" + token;
+        
+        
+        
         try {
 //        	メール送信：メール内容は、下のsendEmail()で実行
             sendEmail(email, resetUrl);
@@ -71,7 +84,7 @@ public class PasswordResetController {
     
     
 //  パスワード再発行➀：ユーザーがパスワード再発行リンクをクリックすると、新しいパスワードを設定するためのフォームを表示
-    @GetMapping("/reset-password")
+    @GetMapping("/auth/reset-password")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
     	
         PasswordResetToken resetToken = userService.getPasswordResetToken(token);
@@ -85,7 +98,7 @@ public class PasswordResetController {
     }
 
 //  パスワード再発行➁：ユーザーがパスワード再発行リンクをクリックすると、新しいパスワードを設定するためのフォームを表示
-    @PostMapping("/reset-password")
+    @PostMapping("/auth/reset-password")
     public String processResetPassword(@RequestParam("token") String token,
                                        @Valid UserPasswordResetForm userPasswordResetForm,
                                        BindingResult result,
@@ -93,7 +106,7 @@ public class PasswordResetController {
     	
          if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "フォームにエラーがあります。");
-            return "redirect:/reset-password?token=" + token;
+            return "redirect:/auth/reset-password?token=" + token;
         }
         
         boolean success = userService.updatePassword(token, userPasswordResetForm.getNewPassword());
@@ -104,7 +117,7 @@ public class PasswordResetController {
             return "redirect:/login";
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "パスワードの更新に失敗しました。");
-            return "redirect:/reset-password?token=" + token;
+            return "redirect:/auth/reset-password?token=" + token;
         }
     }
 
