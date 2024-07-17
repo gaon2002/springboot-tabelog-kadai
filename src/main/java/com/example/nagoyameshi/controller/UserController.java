@@ -224,15 +224,19 @@ public class UserController {
     public String updatePaymentMethodForm(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
     									  Model model) {
  
- 	    String customerId = userDetailsImpl.getUser().getRememberToken(); // Stripeの顧客ID
-	    PaymentMethod paymentMethod = stripeService.getDefaultPaymentMethod(customerId);
-	
-	    if (paymentMethod != null && paymentMethod.getCard() != null) {
-	        model.addAttribute("cardBrand", paymentMethod.getCard().getBrand());
-	        model.addAttribute("last4", paymentMethod.getCard().getLast4());
-	        model.addAttribute("expiryMonth", paymentMethod.getCard().getExpMonth());
-	        model.addAttribute("expiryYear", paymentMethod.getCard().getExpYear());
-	    }
+    	String customerId = userDetailsImpl.getUser().getRememberToken(); // Stripeの顧客ID
+        System.out.println("Customer ID: " + customerId);  //OK
+        
+        PaymentMethod paymentMethod = stripeService.getDefaultPaymentMethod(customerId);
+        
+        if (paymentMethod != null && paymentMethod.getCard() != null) {
+            model.addAttribute("cardBrand", paymentMethod.getCard().getBrand());
+            model.addAttribute("last4", paymentMethod.getCard().getLast4());
+            model.addAttribute("expiryMonth", paymentMethod.getCard().getExpMonth());
+            model.addAttribute("expiryYear", paymentMethod.getCard().getExpYear());
+        } else {
+            System.out.println("Payment method or card details are null.");
+        }
 
         return "user/UserUpdatePayment";
     }

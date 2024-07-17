@@ -209,18 +209,46 @@ public class StripeService {
      
 //   カード情報表示
      public PaymentMethod getDefaultPaymentMethod(String customerId) {
-         try {
-        	 
-             Customer customer = Customer.retrieve(customerId);
-             String defaultPaymentMethodId = customer.getInvoiceSettings().getDefaultPaymentMethod();
-             
-             if (defaultPaymentMethodId != null) {
-                 return PaymentMethod.retrieve(defaultPaymentMethodId);
-             }
-         } catch (StripeException e) {
-             // エラーログ記録やエラーハンドリング
-         }
-         return null;
+    	 try {
+    	        Customer customer = Customer.retrieve(customerId);
+    	        System.out.println("Customer: " + customer);  // デバッグログ追加
+    	        
+    	        // 顧客の支払い方法をすべてリストする
+    	        PaymentMethodCollection paymentMethods = PaymentMethod.list(
+    	            PaymentMethodListParams.builder()
+    	                .setCustomer(customerId)
+    	                .setType(PaymentMethodListParams.Type.CARD)
+    	                .build()
+    	        );
+    	        
+    	        PaymentMethod defaultPaymentMethod = null;
+    	        for (PaymentMethod paymentMethod : paymentMethods.getData()) {
+    	            if (paymentMethod.getId().equals(customer.getInvoiceSettings().getDefaultPaymentMethod())) {
+    	                defaultPaymentMethod = paymentMethod;
+    	                break;
+    	            }
+    	        }
+    	        
+    	        // デフォルトの支払い方法が設定されていない場合
+    	        if (defaultPaymentMethod == null && !paymentMethods.getData().isEmpty()) {
+    	            defaultPaymentMethod = paymentMethods.getData().get(0);
+    	            // デフォルトの支払い方法を設定
+    	            CustomerUpdateParams params = CustomerUpdateParams.builder()
+    	                .setInvoiceSettings(
+    	                    CustomerUpdateParams.InvoiceSettings.builder()
+    	                        .setDefaultPaymentMethod(defaultPaymentMethod.getId())
+    	                        .build()
+    	                )
+    	                .build();
+    	            customer = customer.update(params);
+    	        }
+    	        
+    	        return defaultPaymentMethod;
+    	    } catch (StripeException e) {
+    	        // エラーログ記録やエラーハンドリング
+    	        System.out.println("Stripe Error: " + e.getMessage());
+    	    }
+    	    return null;
      }
      
 }
