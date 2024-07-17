@@ -45,6 +45,4 @@ public class SignupForm {
     @NotBlank(message = "パスワード（確認用）を入力してください。")
     private String passwordConfirmation;    
     
-    @NotNull(message = "選択してください")
-    private Integer subscribe;   
 }

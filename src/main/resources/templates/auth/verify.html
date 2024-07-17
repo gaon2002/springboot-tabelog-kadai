@@ -27,20 +27,13 @@
                                 <span th:text="${errorMessage}"></span>
                             </div>
                             
-                            
-							
-								<div sec:authorize="hasRole('ROLE_PAID')">
-									<form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
-	                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">月額料金決済手続き</button>
-	                        		</form>
-                        		</div>
-							
-							<div sec:authorize="hasRole('ROLE_FREE')">
+								<form id="checkout-form" th:action="@{/user/create-checkout-session}" method="post">
+                            		<button id="checkout-button" class="btn text-white shadow-sm w-100 samuraitravel-btn">有料会員になる</button>
+                        		</form>
+						
 								<div class="text-center mt-4">
-        							<a th:href="@{/}">会員ホームに戻る</a>
+        							<a th:href="@{/}">有料会員にならずホームに戻る</a>
         						</div>
-							</div>
-                            
                             
                         </div>
                     </div>

@@ -39,17 +39,7 @@ public class UserService {
     public User create(SignupForm signupForm) {
         User user = new User();
              
-        Integer subscribe = signupForm.getSubscribe();
-        Role role = null;
-        
-        if (subscribe != null) {
-            if (subscribe.equals(2)) {
-                role = roleRepository.findByName("ROLE_PAID");
-                
-            }if (subscribe.equals(3)) {
-                role = roleRepository.findByName("ROLE_FREE");
-            }
-        }
+        Role role = roleRepository.findByName("ROLE_FREE");
         
         user.setName(signupForm.getName());
         user.setFurigana(signupForm.getFurigana());
@@ -62,7 +52,7 @@ public class UserService {
 //      パスワードはハッシュ化：SpringSecurityが提供するPasswordEncoderインターフェースのencode()メソッドを利用。
         user.setPassword(passwordEncoder.encode(signupForm.getPassword()));
         user.setRole(role);
-        user.setSubscribe(subscribe);
+        user.setSubscribe(3);
 //      メール認証が完了するまで、falseとする
         user.setEnabled(false);        
         

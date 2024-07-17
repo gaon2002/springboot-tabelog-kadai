@@ -2,13 +2,17 @@
 //	DOMContentLoadedイベントリスナーを使用して、DOMが完全に読み込まれた後にJavaScriptが実行されるようにします。
 document.addEventListener('DOMContentLoaded', function () {
 	
+  let today = new Date();
+  let minDate = new Date(today);
+  minDate.setDate(today.getDate() + 1); // 今日の日付に1日を追加
+	
   let maxDate = new Date();
   maxDate.setMonth(maxDate.getMonth() + 3);
 
   const config1 = {
     wrap: true,
     locale: 'ja',
-    minDate: new Date(),
+    minDate: minDate,
     maxDate: maxDate,
   };
   
