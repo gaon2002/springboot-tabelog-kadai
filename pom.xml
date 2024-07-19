@@ -97,7 +97,19 @@
 		    <version>3.0.4</version>
 		 </dependency>
 		 
-
+		 <!-- Model Mapper ADD:2024-07-13 -->	
+		 <dependency>	
+		 	<groupId>org.modelmapper.extensions</groupId>	
+		 	<artifactId>modelmapper-spring</artifactId>	
+		 	<version>2.3.9</version>	
+		 </dependency>
+		 
+		 <!-- CSV出力用 ADD:2024-07-13 -->
+	     <dependency>
+	       <groupId>com.orangesignal</groupId>
+	       <artifactId>orangesignal-csv</artifactId>
+	       <version>2.2.1</version>
+	     </dependency>
 		
 	</dependencies>
 

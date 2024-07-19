@@ -49,7 +49,17 @@ footer{
 	transition: 0.1s;
 }
 
+.samuraitravel-btn2{
+	background-color: #5196a6 !important;
+	transition: 0.1s;
+	border-radius: 5px 5px 5px 5px !important; /* 角を角ばらせる */
+}
+
 .samuraitravel-btn:hover{
+	opacity:0.8;
+}
+
+.samuraitravel-btn2:hover{
 	opacity:0.8;
 }
 
