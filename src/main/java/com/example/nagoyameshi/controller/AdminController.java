@@ -129,16 +129,16 @@ public class AdminController {
 				
 				/** ファイル名取得 */
 //				ResourceBundle：アプリケーションが異なるロケール（言語や地域）に対応するために、メッセージや設定値を外部ファイルに分離して管理するためのクラス
-				ResourceBundle rb = ResourceBundle.getBundle("nagoyameshi");
+				ResourceBundle rb = ResourceBundle.getBundle("application-development");
 				// CSV保存用パス
 				String csvpath = rb.getString("csv.dirpath");
 
 				// CSVファイル名取得
 				String filename = rb.getString("csv.filename.001");
 				
-				System.out.println("rb：" + rb);
-				System.out.println("csvpath：" + csvpath);
-				System.out.println("filename：" + filename);
+				System.out.println("rb：" + rb); //【OK】
+				System.out.println("csvpath：" + csvpath); //【OK】
+				System.out.println("filename：" + filename); //【OK】
 				
 
 				// CSV出力用フォルダの作成（mkdir：make directory）
@@ -150,7 +150,7 @@ public class AdminController {
 				} else {
 //					・mkdir()メソッド：このFileオブジェクトが指すディレクトリを実際に作成。
 				    if (dir.mkdir()) {
-				        System.out.println("ディレクトリの作成に成功しました。");
+				        System.out.println("ディレクトリの作成に成功しました。");  //【OK】
 				    } else {
 				        System.out.println("ディレクトリの作成に失敗しました。");
 				    }
